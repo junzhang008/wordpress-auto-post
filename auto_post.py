@@ -16,7 +16,22 @@ except ImportError:
     TOPICS_BY_CATEGORY = {
         "一年级数学": ["10以内加减法练习", "认识数字1-100", "简单图形识别"],
         "二年级数学": ["乘法口诀记忆", "100以内加减法", "认识时间"],
-        # ... 其他分类的默认主题
+        "三年级数学": ["万以内数的认识", "两位数乘法", "小数初步认识"],
+        "四年级数学": ["大数的认识", "小数运算", "几何图形"],
+        "五年级数学": ["分数运算", "方程初步", "立体图形"],
+        "六年级数学": ["比例应用", "圆的面积", "统计图表"],
+        "一年级语文": ["拼音学习", "汉字书写", "简单阅读"],
+        "二年级语文": ["词语积累", "句子练习", "短文阅读"],
+        "三年级语文": ["段落写作", "阅读理解", "古诗词"],
+        "四年级语文": ["作文指导", "文言文入门", "修辞手法"],
+        "五年级语文": ["议论文基础", "文学欣赏", "写作技巧"],
+        "六年级语文": ["综合写作", "古文阅读", "文学常识"],
+        "一年级英语": ["字母学习", "简单单词", "基础对话"],
+        "二年级英语": ["单词记忆", "简单句型", "英语儿歌"],
+        "三年级英语": ["语法入门", "阅读理解", "英语写作"],
+        "四年级英语": ["时态学习", "阅读提升", "口语练习"],
+        "五年级英语": ["复合句学习", "阅读策略", "写作训练"],
+        "六年级英语": ["语法综合", "阅读进阶", "应试准备"]
     }
 
 # 配置
@@ -25,7 +40,7 @@ WORDPRESS_URL = os.getenv('WORDPRESS_URL')
 WORDPRESS_USER = os.getenv('WORDPRESS_USER')
 WORDPRESS_PASSWORD = os.getenv('WORDPRESS_PASSWORD')
 
-# 分类映射（需要你根据实际情况更新分类ID）
+# 分类映射（使用你提供的正确分类ID）
 CATEGORY_MAP = {
     "一年级数学": 6,
     "二年级数学": 7, 
@@ -47,13 +62,8 @@ CATEGORY_MAP = {
     "六年级英语": 23
 }
 
-# 智能标签库（保持不变）
-TAG_LIBRARY = {
-    # ... 之前的标签库配置
-}
-
-# 停用词列表（保持不变）
-STOP_WORDS = {"的", "了", "在", "是", "我", "有", "和", "就", "不", "人", "都", "一", "一个", "上", "也", "很", "到", "说", "要", "去", "你", "会", "着", "没有", "看", "好", "自己", "这", "那", "他", "她", "它"}
+# 标签缓存，避免重复查询
+TAG_CACHE = {}
 
 def generate_random_slug(length=8):
     """生成随机别名"""
@@ -75,7 +85,6 @@ def extract_keywords_from_content(content, topK=5):
         filtered_keywords = []
         for word in keywords:
             if (len(word) >= 2 and len(word) <= 6 and 
-                word not in STOP_WORDS and 
                 not word.isdigit()):
                 filtered_keywords.append(word)
         
@@ -85,20 +94,20 @@ def extract_keywords_from_content(content, topK=5):
         print(f"关键词提取失败: {e}")
         # 备用方案：简单分词
         words = content.replace('\n', ' ').replace('，', ' ').replace('。', ' ').split(' ')
-        meaningful_words = [word for word in words if len(word) >= 2 and len(word) <= 6 and word not in STOP_WORDS]
+        meaningful_words = [word for word in words if len(word) >= 2 and len(word) <= 6]
         return random.sample(meaningful_words, min(topK, len(meaningful_words)))
 
 def extract_keywords_from_title(title):
     """从标题中提取关键词"""
     try:
         words = jieba.lcut(title)
-        keywords = [word for word in words if len(word) >= 2 and word not in STOP_WORDS]
+        keywords = [word for word in words if len(word) >= 2]
         return keywords[:3]  # 最多取3个
     except:
         return [word for word in title if len(word) >= 2][:3]
 
 def generate_smart_tags(category, content, title):
-    """生成智能标签"""
+    """生成智能标签名称"""
     tags = set()
     
     # 1. 基础分类标签
@@ -119,17 +128,17 @@ def generate_smart_tags(category, content, title):
     
     # 4. 学科特定标签
     if "数学" in subject:
-        math_tags = ["计算题", "应用题", "数学思维", "解题技巧", "逻辑训练"]
+        math_tags = ["计算题", "应用题", "数学思维", "解题技巧", "逻辑训练", "几何图形", "代数基础"]
         tags.update(random.sample(math_tags, 3))
     elif "语文" in subject:
-        chinese_tags = ["阅读理解", "作文指导", "古诗词", "汉字书写", "语言表达"]
+        chinese_tags = ["阅读理解", "作文指导", "古诗词", "汉字书写", "语言表达", "文学欣赏", "写作技巧"]
         tags.update(random.sample(chinese_tags, 3))
     elif "英语" in subject:
-        english_tags = ["单词记忆", "语法学习", "口语练习", "听力训练", "英语阅读"]
+        english_tags = ["单词记忆", "语法学习", "口语练习", "听力训练", "英语阅读", "英语写作", "发音纠正"]
         tags.update(random.sample(english_tags, 3))
     
     # 5. 通用学习标签
-    learning_tags = ["学习方法", "学习资料", "家长必读", "教学资源", "知识点总结"]
+    learning_tags = ["学习方法", "学习资料", "家长必读", "教学资源", "知识点总结", "教育指导"]
     tags.update(random.sample(learning_tags, 2))
     
     # 6. 难度标签
@@ -137,21 +146,83 @@ def generate_smart_tags(category, content, title):
     tags.add(random.choice(difficulty_tags))
     
     # 7. 资源类型标签
-    resource_tags = ["电子版", "可打印", "练习题", "测试卷", "知识点"]
+    resource_tags = ["电子版", "可打印", "练习题", "测试卷", "知识点", "学习计划"]
     tags.add(random.choice(resource_tags))
     
-    # 8. 确保标签多样性，避免重复
+    # 8. 学习方法标签
+    method_tags = ["记忆方法", "理解技巧", "应用实践", "举一反三"]
+    tags.add(random.choice(method_tags))
+    
+    # 9. 确保标签多样性，避免重复
     final_tags = []
     for tag in tags:
-        if len(tag) <= 8:  # 限制标签长度
+        if len(tag) <= 8 and len(tag) >= 2:  # 限制标签长度
             final_tags.append(tag)
     
     # 随机排序并限制数量（6-10个）
     random.shuffle(final_tags)
     final_tags = final_tags[:random.randint(6, 10)]
     
-    print(f"🏷️  生成的智能标签({len(final_tags)}个): {final_tags}")
+    print(f"🏷️  生成的智能标签名称({len(final_tags)}个): {final_tags}")
     return final_tags
+
+def get_or_create_tag(tag_name):
+    """获取或创建标签，返回标签ID"""
+    global TAG_CACHE
+    
+    # 检查缓存
+    if tag_name in TAG_CACHE:
+        return TAG_CACHE[tag_name]
+    
+    try:
+        api_url = WORDPRESS_URL.rstrip('/') + '/wp-json/wp/v2/tags'
+        auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
+        
+        # 先搜索是否已存在该标签
+        search_url = f"{api_url}?search={tag_name}"
+        response = requests.get(search_url, auth=auth, timeout=10)
+        
+        if response.status_code == 200:
+            tags = response.json()
+            # 精确匹配标签名称
+            for tag in tags:
+                if tag['name'] == tag_name:
+                    TAG_CACHE[tag_name] = tag['id']
+                    print(f"  ✅ 找到现有标签: {tag_name} (ID: {tag['id']})")
+                    return tag['id']
+        
+        # 如果不存在，创建新标签
+        tag_data = {
+            'name': tag_name,
+            'slug': tag_name  # 使用名称作为别名
+        }
+        
+        response = requests.post(api_url, json=tag_data, auth=auth, timeout=10)
+        
+        if response.status_code == 201:
+            tag_id = response.json()['id']
+            TAG_CACHE[tag_name] = tag_id
+            print(f"  ✅ 创建新标签: {tag_name} (ID: {tag_id})")
+            return tag_id
+        else:
+            print(f"  ⚠️  创建标签失败: {tag_name}, 状态码: {response.status_code}")
+            return None
+            
+    except Exception as e:
+        print(f"  ❌ 标签操作异常: {tag_name}, 错误: {e}")
+        return None
+
+def get_tag_ids(tag_names):
+    """将标签名称列表转换为标签ID列表"""
+    tag_ids = []
+    
+    for tag_name in tag_names:
+        tag_id = get_or_create_tag(tag_name)
+        if tag_id:
+            tag_ids.append(tag_id)
+    
+    print(f"🔢 转换后的标签ID({len(tag_ids)}个): {tag_ids}")
+    return tag_ids
 
 def get_zhipu_ai_content(topic, category):
     """使用智谱AI生成文章"""
@@ -187,7 +258,7 @@ def get_zhipu_ai_content(topic, category):
     """
     
     data = {
-        "model": "glm-4",
+        "model": "gpt-3.5-turbo",  # 使用成本更低的模型
         "messages": [
             {
                 "role": "system", 
@@ -199,7 +270,7 @@ def get_zhipu_ai_content(topic, category):
             }
         ],
         "temperature": 0.7,
-        "max_tokens": 2000
+        "max_tokens": 1500
     }
     
     try:
@@ -222,8 +293,11 @@ def post_to_wordpress_with_tags(title, content, category, slug):
     try:
         api_url = WORDPRESS_URL.rstrip('/') + '/wp-json/wp/v2/posts'
         
-        # 生成智能标签
-        tags = generate_smart_tags(category, content, title)
+        # 生成智能标签名称
+        tag_names = generate_smart_tags(category, content, title)
+        
+        # 将标签名称转换为标签ID
+        tag_ids = get_tag_ids(tag_names)
         
         # 使用 HTTPBasicAuth
         auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
@@ -236,22 +310,24 @@ def post_to_wordpress_with_tags(title, content, category, slug):
             'content': content,
             'status': 'publish',
             'categories': [category_id],
-            'slug': slug,
-            'tags': tags  # 添加标签
+            'slug': slug
         }
+        
+        # 只有在有标签ID时才添加tags字段
+        if tag_ids:
+            post_data['tags'] = tag_ids
         
         print(f"📤 发布数据准备完成:")
         print(f"  - 标题: {title}")
         print(f"  - 分类: {category}(ID:{category_id})")
         print(f"  - 别名: {slug}")
-        print(f"  - 标签数: {len(tags)}")
+        print(f"  - 标签ID数: {len(tag_ids)}")
         
         response = requests.post(api_url, json=post_data, auth=auth, timeout=30)
         print(f"🌐 WordPress响应状态: {response.status_code}")
         
         if response.status_code == 201:
             print(f"✅ 文章发布成功！")
-            print(f"🔗 文章链接: {response.json().get('link', '未知')}")
             return True
         else:
             print(f"❌ 发布失败: {response.text}")
@@ -301,7 +377,6 @@ def main():
             topic = random.choice(TOPICS_BY_CATEGORY[category])
             print(f"📖 分类: {category}")
             print(f"🎯 主题: {topic}")
-            print(f"📋 该分类剩余主题数: {len(TOPICS_BY_CATEGORY[category])}")
         else:
             print(f"⚠️  分类 {category} 没有可用主题，使用默认主题")
             topic = f"{category}学习资料"
