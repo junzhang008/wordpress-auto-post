@@ -257,8 +257,9 @@ def get_zhipu_ai_content(topic, category):
     请开始写作：
     """
     
+    # 使用正确的智谱AI模型
     data = {
-        "model": "gpt-3.5-turbo",  # 使用成本更低的模型
+        "model": "glm-4",  # 使用正确的智谱AI模型
         "messages": [
             {
                 "role": "system", 
