@@ -2,7 +2,7 @@ name: 自动发布文章
 
 on:
   schedule:
-    - cron: '0 9 * * 1'  # 每周一上午9点（UTC时间，对应北京时间下午5点）
+    - cron: '0 0 * * *'  # 每天UTC时间0点（北京时间上午8点）
   workflow_dispatch:  # 允许手动运行
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
     - name: 📦 安装依赖
       run: |
         pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install requests jieba
         
     - name: 🚀 运行自动发布脚本
       env:
