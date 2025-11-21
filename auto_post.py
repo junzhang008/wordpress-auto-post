@@ -2,7 +2,7 @@ import requests
 import random
 import os
 from datetime import datetime
-import base64
+from requests.auth import HTTPBasicAuth
 
 # 配置
 ZHIPU_API_KEY = os.getenv('ZHIPU_API_KEY')
@@ -10,22 +10,17 @@ WORDPRESS_URL = os.getenv('WORDPRESS_URL')
 WORDPRESS_USER = os.getenv('WORDPRESS_USER')
 WORDPRESS_PASSWORD = os.getenv('WORDPRESS_PASSWORD')
 
-def debug_wordpress_connection():
-    """调试 WordPress 连接"""
-    print("=== WordPress 连接调试 ===")
-    print(f"URL: {WORDPRESS_URL}")
-    print(f"用户: {WORDPRESS_USER}")
-    print(f"密码长度: {len(WORDPRESS_PASSWORD) if WORDPRESS_PASSWORD else 0}")
-    
-    # 测试 REST API 端点
-    test_url = WORDPRESS_URL.rstrip('/') + '/wp-json/'
-    try:
-        response = requests.get(test_url, timeout=10)
-        print(f"REST API 状态: {response.status_code}")
-    except Exception as e:
-        print(f"REST API 测试失败: {e}")
-    
-    print("=== 调试结束 ===")
+# 文章主题库
+TOPICS = [
+    "如何提高工作效率的10个技巧",
+    "人工智能对日常生活的影响",
+    "健康饮食的简单实践方法",
+    "学习新技能的有效途径",
+    "数字时代的个人成长策略",
+    "时间管理的实用技巧",
+    "保持心理健康的方法",
+    "理财入门基础知识"
+]
 
 def get_zhipu_ai_content(topic):
     """使用智谱AI生成文章"""
@@ -41,7 +36,7 @@ def get_zhipu_ai_content(topic):
         "messages": [
             {
                 "role": "user", 
-                "content": f"请写一篇关于'{topic}'的博客文章，600字左右，要有实用价值"
+                "content": f"请写一篇关于'{topic}'的博客文章，800字左右，要有实用价值，包含具体的例子和建议，使用自然段落格式"
             }
         ],
         "temperature": 0.7
@@ -59,52 +54,48 @@ def get_zhipu_ai_content(topic):
         print(f"AI生成失败: {e}")
         return None
 
-def post_to_wordpress_simple(title, content):
-    """简化版 WordPress 发布"""
+def post_to_wordpress(title, content):
+    """发布到WordPress"""
     try:
         api_url = WORDPRESS_URL.rstrip('/') + '/wp-json/wp/v2/posts'
         print(f"发布到: {api_url}")
         
-        # 使用 Basic Auth
-        auth = (WORDPRESS_USER, WORDPRESS_PASSWORD)
+        # 使用 HTTPBasicAuth
+        auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
         
-        # 简化文章数据
         post_data = {
             'title': title,
             'content': content,
-            'status': 'draft'  # 先存为草稿，测试成功后再改为 publish
+            'status': 'publish',  # 正式发布
+            'categories': [1]     # 默认分类
         }
         
-        print("发送请求...")
         response = requests.post(api_url, json=post_data, auth=auth, timeout=30)
         print(f"响应状态: {response.status_code}")
-        print(f"响应头: {dict(response.headers)}")
         
         if response.status_code == 201:
-            print("✅ 文章创建成功！")
+            print("✅ 文章发布成功！")
             return True
         else:
-            print(f"❌ 失败响应: {response.text}")
+            print(f"❌ 失败: {response.text}")
             return False
             
     except Exception as e:
-        print(f"❌ 请求异常: {e}")
+        print(f"❌ 异常: {e}")
         return False
 
 def main():
     print("🚀 开始自动发布流程...")
-    
-    # 调试连接
-    debug_wordpress_connection()
+    print(f"当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     # 检查必要的环境变量
     if not all([ZHIPU_API_KEY, WORDPRESS_URL, WORDPRESS_USER, WORDPRESS_PASSWORD]):
         print("❌ 错误：缺少必要的环境变量配置")
         return False
     
-    # 使用固定主题测试
-    topic = "测试文章：技术发展趋势"
-    print(f"📝 测试主题: {topic}")
+    # 随机选择主题
+    topic = random.choice(TOPICS)
+    print(f"📝 生成主题: {topic}")
     
     # 获取AI生成内容
     print("🤖 正在调用AI生成内容...")
@@ -118,13 +109,13 @@ def main():
     
     # 发布到WordPress
     print("🌐 正在发布到 WordPress...")
-    success = post_to_wordpress_simple(topic, content)
+    success = post_to_wordpress(topic, content)
     
     if success:
-        print("🎉 测试成功！")
+        print("🎉 文章发布成功！")
         return True
     else:
-        print("💥 测试失败")
+        print("💥 文章发布失败")
         return False
 
 if __name__ == "__main__":
