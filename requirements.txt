@@ -1,2 +1,2 @@
 requests==2.31.0
-wordpress-xmlrpc==2.3
+python-wordpress-xmlrpc==2.3
