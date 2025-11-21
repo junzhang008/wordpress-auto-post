@@ -6,18 +6,26 @@ import base64
 
 # 配置
 ZHIPU_API_KEY = os.getenv('ZHIPU_API_KEY')
-WORDPRESS_URL = os.getenv('WORDPRESS_URL')  # 应该是 https://你的网站.com
+WORDPRESS_URL = os.getenv('WORDPRESS_URL')
 WORDPRESS_USER = os.getenv('WORDPRESS_USER')
-WORDPRESS_PASSWORD = os.getenv('WORDPRESS_PASSWORD')  # 应用密码
+WORDPRESS_PASSWORD = os.getenv('WORDPRESS_PASSWORD')
 
-# 文章主题库
-TOPICS = [
-    "如何提高工作效率的10个技巧",
-    "人工智能对日常生活的影响", 
-    "健康饮食的简单实践方法",
-    "学习新技能的有效途径",
-    "数字时代的个人成长策略"
-]
+def debug_wordpress_connection():
+    """调试 WordPress 连接"""
+    print("=== WordPress 连接调试 ===")
+    print(f"URL: {WORDPRESS_URL}")
+    print(f"用户: {WORDPRESS_USER}")
+    print(f"密码长度: {len(WORDPRESS_PASSWORD) if WORDPRESS_PASSWORD else 0}")
+    
+    # 测试 REST API 端点
+    test_url = WORDPRESS_URL.rstrip('/') + '/wp-json/'
+    try:
+        response = requests.get(test_url, timeout=10)
+        print(f"REST API 状态: {response.status_code}")
+    except Exception as e:
+        print(f"REST API 测试失败: {e}")
+    
+    print("=== 调试结束 ===")
 
 def get_zhipu_ai_content(topic):
     """使用智谱AI生成文章"""
@@ -33,7 +41,7 @@ def get_zhipu_ai_content(topic):
         "messages": [
             {
                 "role": "user", 
-                "content": f"请写一篇关于'{topic}'的博客文章，800字左右，要有实用价值，使用自然段落格式"
+                "content": f"请写一篇关于'{topic}'的博客文章，600字左右，要有实用价值"
             }
         ],
         "temperature": 0.7
@@ -46,61 +54,57 @@ def get_zhipu_ai_content(topic):
             return result['choices'][0]['message']['content']
         else:
             print(f"API请求失败: {response.status_code}")
-            print(f"错误详情: {response.text}")
             return None
     except Exception as e:
         print(f"AI生成失败: {e}")
         return None
 
-def post_to_wordpress_app_password(title, content):
-    """使用 WordPress 应用密码发布"""
+def post_to_wordpress_simple(title, content):
+    """简化版 WordPress 发布"""
     try:
-        # 构建 REST API 端点
         api_url = WORDPRESS_URL.rstrip('/') + '/wp-json/wp/v2/posts'
         print(f"发布到: {api_url}")
         
-        # 使用应用密码认证
+        # 使用 Basic Auth
         auth = (WORDPRESS_USER, WORDPRESS_PASSWORD)
         
+        # 简化文章数据
         post_data = {
             'title': title,
             'content': content,
-            'status': 'publish',  # 直接发布
-            'categories': [1]     # 默认分类
+            'status': 'draft'  # 先存为草稿，测试成功后再改为 publish
         }
         
+        print("发送请求...")
         response = requests.post(api_url, json=post_data, auth=auth, timeout=30)
-        print(f"WordPress响应状态: {response.status_code}")
+        print(f"响应状态: {response.status_code}")
+        print(f"响应头: {dict(response.headers)}")
         
         if response.status_code == 201:
-            print("✅ 文章发布成功！")
+            print("✅ 文章创建成功！")
             return True
-        elif response.status_code == 401:
-            print("❌ 认证失败，请检查应用密码")
-            return False
-        elif response.status_code == 404:
-            print("❌ REST API 未找到，请检查固定链接设置")
-            return False
         else:
-            print(f"❌ 发布失败，响应: {response.text}")
+            print(f"❌ 失败响应: {response.text}")
             return False
             
     except Exception as e:
-        print(f"❌ 发布失败: {e}")
+        print(f"❌ 请求异常: {e}")
         return False
 
 def main():
     print("🚀 开始自动发布流程...")
-    print(f"当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    
+    # 调试连接
+    debug_wordpress_connection()
     
     # 检查必要的环境变量
     if not all([ZHIPU_API_KEY, WORDPRESS_URL, WORDPRESS_USER, WORDPRESS_PASSWORD]):
         print("❌ 错误：缺少必要的环境变量配置")
         return False
     
-    # 随机选择主题
-    topic = random.choice(TOPICS)
-    print(f"📝 生成主题: {topic}")
+    # 使用固定主题测试
+    topic = "测试文章：技术发展趋势"
+    print(f"📝 测试主题: {topic}")
     
     # 获取AI生成内容
     print("🤖 正在调用AI生成内容...")
@@ -112,15 +116,15 @@ def main():
         
     print("✅ 内容生成成功")
     
-    # 发布到WordPress（使用应用密码）
-    print("🌐 正在通过应用密码发布到 WordPress...")
-    success = post_to_wordpress_app_password(topic, content)
+    # 发布到WordPress
+    print("🌐 正在发布到 WordPress...")
+    success = post_to_wordpress_simple(topic, content)
     
     if success:
-        print("🎉 文章发布成功！")
+        print("🎉 测试成功！")
         return True
     else:
-        print("💥 文章发布失败")
+        print("💥 测试失败")
         return False
 
 if __name__ == "__main__":
