@@ -6,6 +6,8 @@ from datetime import datetime
 from requests.auth import HTTPBasicAuth
 import jieba
 import jieba.analyse
+import base64
+import time
 
 # 导入完整的主题库
 try:
@@ -39,6 +41,7 @@ ZHIPU_API_KEY = os.getenv('ZHIPU_API_KEY')
 WORDPRESS_URL = os.getenv('WORDPRESS_URL')
 WORDPRESS_USER = os.getenv('WORDPRESS_USER')
 WORDPRESS_PASSWORD = os.getenv('WORDPRESS_PASSWORD')
+UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY')  # 可选：Unsplash API密钥
 
 # 分类映射（使用你提供的正确分类ID）
 CATEGORY_MAP = {
@@ -60,6 +63,19 @@ CATEGORY_MAP = {
     "四年级英语": 21,
     "五年级英语": 22,
     "六年级英语": 23
+}
+
+# 主题相关的图片关键词映射
+TOPIC_IMAGE_KEYWORDS = {
+    "数学": ["数学", "学习", "教育", "数字", "计算", "几何", "公式"],
+    "语文": ["语文", "阅读", "写作", "书籍", "文学", "汉字", "书法"],
+    "英语": ["英语", "学习", "国际", "字母", "单词", "对话", "外语"],
+    "一年级": ["儿童", "基础", "入门", "简单", "趣味"],
+    "二年级": ["儿童", "学习", "成长", "进步"],
+    "三年级": ["学生", "学习", "教育", "校园"],
+    "四年级": ["学生", "教育", "学习", "课堂"],
+    "五年级": ["学生", "学习", "教育", "思考"],
+    "六年级": ["学生", "毕业", "升学", "考试"]
 }
 
 # 标签缓存，避免重复查询
@@ -224,6 +240,183 @@ def get_tag_ids(tag_names):
     print(f"🔢 转换后的标签ID({len(tag_ids)}个): {tag_ids}")
     return tag_ids
 
+def get_image_keywords(category, topic):
+    """根据分类和主题生成图片搜索关键词"""
+    keywords = []
+    
+    # 提取年级和科目
+    grade = category[:3]
+    subject = category[3:]
+    
+    # 添加基础关键词
+    keywords.extend(TOPIC_IMAGE_KEYWORDS.get(grade, []))
+    keywords.extend(TOPIC_IMAGE_KEYWORDS.get(subject, []))
+    
+    # 从主题中提取关键词
+    topic_words = jieba.lcut(topic)
+    keywords.extend([word for word in topic_words if len(word) >= 2])
+    
+    # 添加教育相关通用关键词
+    keywords.extend(["教育", "学习", "学校", "课堂", "学生"])
+    
+    # 去重并限制数量
+    unique_keywords = list(set(keywords))[:5]
+    
+    print(f"🖼️  图片搜索关键词: {unique_keywords}")
+    return unique_keywords
+
+def get_unsplash_image(keywords):
+    """从Unsplash获取相关图片（如果有API密钥）"""
+    if not UNSPLASH_ACCESS_KEY:
+        return None
+        
+    try:
+        # 随机选择一个关键词
+        keyword = random.choice(keywords)
+        
+        url = "https://api.unsplash.com/photos/random"
+        params = {
+            "query": f"{keyword} education",
+            "orientation": "landscape",
+            "content_filter": "high"
+        }
+        headers = {
+            "Authorization": f"Client-ID {UNSPLASH_ACCESS_KEY}"
+        }
+        
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            image_url = data['urls']['regular']
+            print(f"✅ 从Unsplash获取图片: {image_url}")
+            return image_url
+        else:
+            print(f"⚠️  Unsplash API请求失败: {response.status_code}")
+            return None
+            
+    except Exception as e:
+        print(f"❌ Unsplash图片获取失败: {e}")
+        return None
+
+def get_stock_image(keywords):
+    """获取免费库存图片（备用方案）"""
+    # 使用Pixabay或其他免费图库的替代方案
+    # 这里使用一些教育相关的免费图片URL
+    education_images = [
+        "https://images.unsplash.com/photo-1497636577773-f1231844b336?w=800",  # 学习
+        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",  # 教育
+        "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800",  # 数学
+        "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",  # 阅读
+        "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=800",  # 书籍
+    ]
+    
+    return random.choice(education_images)
+
+def upload_image_to_wordpress(image_url, title, alt_text=""):
+    """上传图片到WordPress并返回媒体ID"""
+    try:
+        # 下载图片
+        response = requests.get(image_url, timeout=15)
+        if response.status_code != 200:
+            print(f"❌ 图片下载失败: {image_url}")
+            return None
+        
+        # 准备上传到WordPress
+        upload_url = WORDPRESS_URL.rstrip('/') + '/wp-json/wp/v2/media'
+        auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
+        
+        # 生成文件名
+        file_extension = image_url.split('.')[-1].lower()
+        if file_extension not in ['jpg', 'jpeg', 'png', 'gif']:
+            file_extension = 'jpg'
+        
+        filename = f"{generate_random_slug(10)}.{file_extension}"
+        
+        # 上传图片
+        headers = {
+            'Content-Disposition': f'attachment; filename={filename}',
+            'Content-Type': f'image/{file_extension}'
+        }
+        
+        upload_response = requests.post(
+            upload_url,
+            headers=headers,
+            data=response.content,
+            auth=auth,
+            timeout=30
+        )
+        
+        if upload_response.status_code == 201:
+            media_data = upload_response.json()
+            media_id = media_data['id']
+            print(f"✅ 图片上传成功，媒体ID: {media_id}")
+            
+            # 更新图片的alt文本和标题
+            update_data = {
+                'title': title,
+                'alt_text': alt_text or title
+            }
+            
+            update_response = requests.post(
+                f"{upload_url}/{media_id}",
+                json=update_data,
+                auth=auth,
+                timeout=10
+            )
+            
+            return media_id
+        else:
+            print(f"❌ 图片上传失败: {upload_response.status_code}")
+            return None
+            
+    except Exception as e:
+        print(f"❌ 图片上传异常: {e}")
+        return None
+
+def add_featured_image(post_id, media_id):
+    """设置文章的特色图片"""
+    try:
+        update_url = WORDPRESS_URL.rstrip('/') + f'/wp-json/wp/v2/posts/{post_id}'
+        auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
+        
+        update_data = {
+            'featured_media': media_id
+        }
+        
+        response = requests.post(update_url, json=update_data, auth=auth, timeout=10)
+        
+        if response.status_code == 200:
+            print(f"✅ 特色图片设置成功")
+            return True
+        else:
+            print(f"⚠️  特色图片设置失败: {response.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ 设置特色图片异常: {e}")
+        return False
+
+def insert_image_into_content(content, image_url, caption=""):
+    """在文章内容中插入图片"""
+    image_html = f'''
+<div class="article-image">
+    <img src="{image_url}" alt="{caption}" style="width:100%; max-width:800px; height:auto; border-radius:8px; margin:20px 0;">
+    <p style="text-align:center; color:#666; font-size:14px; margin-top:8px;">{caption}</p>
+</div>
+'''
+    
+    # 在文章开头插入图片
+    paragraphs = content.split('</p>')
+    if len(paragraphs) > 1:
+        # 在第一段后插入图片
+        new_content = paragraphs[0] + '</p>' + image_html + '</p>'.join(paragraphs[1:])
+    else:
+        # 如果内容没有分段，在开头插入
+        new_content = image_html + content
+    
+    return new_content
+
 def get_zhipu_ai_content(topic, category):
     """使用智谱AI生成文章"""
     url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
@@ -253,6 +446,7 @@ def get_zhipu_ai_content(topic, category):
     5. 包含实用的学习技巧和记忆方法
     6. 语言生动有趣，适合小学生阅读
     7. 使用自然段落格式，不要使用markdown
+    8. 请在适当位置标注图片插入位置，用[图片]表示
     
     请开始写作：
     """
@@ -288,6 +482,42 @@ def get_zhipu_ai_content(topic, category):
     except Exception as e:
         print(f"❌ AI生成失败: {e}")
         return None
+
+def process_images_for_article(category, topic, content, post_id):
+    """为文章处理图片"""
+    try:
+        # 生成图片关键词
+        image_keywords = get_image_keywords(category, topic)
+        
+        # 获取图片URL
+        image_url = get_unsplash_image(image_keywords)
+        if not image_url:
+            image_url = get_stock_image(image_keywords)
+        
+        if image_url:
+            print(f"🖼️  获取到图片URL: {image_url}")
+            
+            # 上传图片到WordPress
+            alt_text = f"{topic} - 小学教育学习资料"
+            media_id = upload_image_to_wordpress(image_url, topic, alt_text)
+            
+            if media_id:
+                # 设置特色图片
+                add_featured_image(post_id, media_id)
+                
+                # 在内容中插入图片
+                content_with_image = insert_image_into_content(content, image_url, f"{topic}示意图")
+                return content_with_image, media_id
+            else:
+                print("⚠️  图片上传失败，使用原内容")
+                return content, None
+        else:
+            print("⚠️  无法获取图片，使用原内容")
+            return content, None
+            
+    except Exception as e:
+        print(f"❌ 图片处理异常: {e}")
+        return content, None
 
 def post_to_wordpress_with_tags(title, content, category, slug):
     """发布到WordPress并自动添加标签"""
@@ -328,7 +558,30 @@ def post_to_wordpress_with_tags(title, content, category, slug):
         print(f"🌐 WordPress响应状态: {response.status_code}")
         
         if response.status_code == 201:
-            print(f"✅ 文章发布成功！")
+            post_data = response.json()
+            post_id = post_data['id']
+            print(f"✅ 文章发布成功！文章ID: {post_id}")
+            
+            # 处理图片（在文章发布后）
+            print("🖼️  开始处理文章图片...")
+            updated_content, media_id = process_images_for_article(category, title, content, post_id)
+            
+            # 如果有图片且内容被更新，更新文章内容
+            if updated_content != content and media_id:
+                update_data = {
+                    'content': updated_content
+                }
+                update_response = requests.post(
+                    f"{api_url}/{post_id}",
+                    json=update_data,
+                    auth=auth,
+                    timeout=10
+                )
+                if update_response.status_code == 200:
+                    print("✅ 文章内容已更新包含图片")
+                else:
+                    print("⚠️  文章内容更新失败")
+            
             return True
         else:
             print(f"❌ 发布失败: {response.text}")
@@ -410,7 +663,6 @@ def main():
         if i < len(selected_categories):
             delay = random.randint(10, 20)
             print(f"⏳ 等待 {delay} 秒后继续下一篇文章...")
-            import time
             time.sleep(delay)
     
     print(f"\n{'='*50}")
