@@ -1,8 +1,8 @@
-name: 自动发布文章
+name: 每小时自动发布文章
 
 on:
   schedule:
-    - cron: '0 * * * *'  # 每天UTC时间0点（北京时间上午8点）
+    - cron: '0 * * * *'  # 每小时的第0分钟执行
   workflow_dispatch:  # 允许手动运行
 
 jobs:
@@ -19,7 +19,6 @@ jobs:
         
     - name: 📦 安装依赖
       run: |
-        pip install --upgrade pip
         pip install requests jieba
         
     - name: 🚀 运行自动发布脚本
@@ -28,4 +27,5 @@ jobs:
         WORDPRESS_URL: ${{ secrets.WORDPRESS_URL }}
         WORDPRESS_USER: ${{ secrets.WORDPRESS_USER }}
         WORDPRESS_PASSWORD: ${{ secrets.WORDPRESS_PASSWORD }}
+        UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
       run: python auto_post.py
