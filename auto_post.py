@@ -788,6 +788,7 @@ def get_zhipu_ai_content(topic, category, angle):
     else:
         difficulty = "适合小学生阅读，语言亲切易懂但专业"
     
+    # 修改提示词，去掉关于图片插入位置的说明
     prompt = f"""
     请以专业教师的身份，为{student_type}写一篇关于'{topic}'的详细学习文章，重点角度是：{angle}。
     
@@ -807,7 +808,6 @@ def get_zhipu_ai_content(topic, category, angle):
     5. 包含丰富的实例和案例分析
     6. 语言生动有趣，适合{student_type}阅读但内容专业
     7. 使用HTML格式，包含适当的标题和段落
-    8. 在适当位置标注图片插入位置，用[图片1]、[图片2]表示
     
     请开始写作：
     """
@@ -842,6 +842,98 @@ def get_zhipu_ai_content(topic, category, angle):
     except Exception as e:
         print(f"❌ AI生成失败: {e}")
         return None
+
+def generate_seo_data(title, content, tags):
+    """生成Yoast SEO相关数据"""
+    try:
+        # 提取SEO标题
+        seo_title = f"{title} | 教育学习资源"
+        
+        # 提取SEO描述
+        # 从内容中提取纯文本
+        plain_text = re.sub(r'<[^>]+>', '', content)
+        # 提取前150个字符作为描述
+        if len(plain_text) > 150:
+            seo_description = plain_text[:150] + "..."
+        else:
+            seo_description = plain_text
+        
+        # 生成焦点关键词
+        if tags and len(tags) > 0:
+            # 从标签中选择最重要的关键词
+            focus_keywords = []
+            for tag in tags:
+                if len(tag) >= 2 and len(tag) <= 6:
+                    focus_keywords.append(tag)
+            focus_keyword = focus_keywords[0] if focus_keywords else title[:3]
+        else:
+            focus_keyword = title[:3]
+        
+        # 生成meta关键词
+        meta_keywords = ",".join(tags[:5]) if len(tags) >= 5 else ",".join(tags)
+        
+        seo_data = {
+            "yoast_title": seo_title,
+            "yoast_meta": {
+                "yoast_wpseo_title": seo_title,
+                "yoast_wpseo_metadesc": seo_description,
+                "yoast_wpseo_focuskw": focus_keyword,
+                "yoast_wpseo_meta-robots-noindex": "index",
+                "yoast_wpseo_meta-robots-nofollow": "follow",
+                "yoast_wpseo_meta-robots-adv": "",
+                "yoast_wpseo_canonical": "",
+                "yoast_wpseo_redirect": "",
+                "yoast_wpseo_opengraph-title": seo_title,
+                "yoast_wpseo_opengraph-description": seo_description,
+                "yoast_wpseo_opengraph-image": "",
+                "yoast_wpseo_twitter-title": seo_title,
+                "yoast_wpseo_twitter-description": seo_description,
+                "yoast_wpseo_twitter-image": ""
+            }
+        }
+        
+        print(f"🔍 生成SEO数据:")
+        print(f"  - 标题: {seo_title}")
+        print(f"  - 描述: {seo_description}")
+        print(f"  - 焦点关键词: {focus_keyword}")
+        
+        return seo_data
+        
+    except Exception as e:
+        print(f"❌ 生成SEO数据失败: {e}")
+        return None
+
+def update_yoast_seo(post_id, seo_data):
+    """更新文章的Yoast SEO信息"""
+    try:
+        update_url = WORDPRESS_URL.rstrip('/') + f'/wp-json/wp/v2/posts/{post_id}'
+        auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
+        
+        update_data = {}
+        
+        # 添加Yoast SEO字段
+        if seo_data:
+            update_data['meta'] = seo_data.get('yoast_meta', {})
+            # 也可以直接设置yoast_title
+            if 'yoast_title' in seo_data:
+                update_data['yoast_title'] = seo_data['yoast_title']
+        
+        if update_data:
+            response = requests.post(update_url, json=update_data, auth=auth, timeout=10)
+            
+            if response.status_code == 200:
+                print("✅ Yoast SEO信息更新成功")
+                return True
+            else:
+                print(f"⚠️  Yoast SEO信息更新失败: {response.status_code}")
+                return False
+        else:
+            print("⚠️  没有SEO数据需要更新")
+            return False
+            
+    except Exception as e:
+        print(f"❌ 更新Yoast SEO异常: {e}")
+        return False
 
 def process_images_for_article(category, topic, content, post_id):
     """为文章处理多张图片"""
@@ -914,6 +1006,9 @@ def post_to_wordpress_with_tags(title, content, category, slug):
         # 获取分类ID
         category_id = CATEGORY_MAP.get(category, 1)
         
+        # 生成SEO数据
+        seo_data = generate_seo_data(title, content, tag_names)
+        
         # 先发布不含图片的文章
         post_data = {
             'title': title,
@@ -926,11 +1021,16 @@ def post_to_wordpress_with_tags(title, content, category, slug):
         if tag_ids:
             post_data['tags'] = tag_ids
         
+        # 添加SEO数据
+        if seo_data and 'yoast_meta' in seo_data:
+            post_data['meta'] = seo_data['yoast_meta']
+        
         print(f"📤 发布数据准备完成:")
         print(f"  - 标题: {title}")
         print(f"  - 分类: {category}(ID:{category_id})")
         print(f"  - 别名: {slug}")
         print(f"  - 标签ID数: {len(tag_ids)}")
+        print(f"  - 包含SEO数据: {'是' if seo_data else '否'}")
         
         response = requests.post(api_url, json=post_data, auth=auth, timeout=30)
         print(f"🌐 WordPress响应状态: {response.status_code}")
@@ -981,6 +1081,11 @@ def post_to_wordpress_with_tags(title, content, category, slug):
                 )
                 if update_response.status_code == 200:
                     print("✅ 文章已发布（不含图片）")
+            
+            # 更新Yoast SEO信息
+            if seo_data:
+                print("🔍 更新Yoast SEO信息...")
+                update_yoast_seo(post_id, seo_data)
             
             return True
         else:
