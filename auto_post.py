@@ -780,7 +780,7 @@ def insert_images_into_content(content, images_data):
     return content_with_images
 
 def get_zhipu_ai_content(topic, category, angle):
-    """使用智谱AI生成丰富内容的文章"""
+    """使用智谱AI生成丰富内容的文章 - 增加字数到2000-2500字"""
     if not ZHIPU_API_KEY:
         print("❌ 智谱API密钥未设置")
         return None
@@ -826,19 +826,19 @@ def get_zhipu_ai_content(topic, category, angle):
     else:
         difficulty = "适合小学生阅读，语言亲切易懂但专业"
     
-    # 修复提示词：要求AI生成干净的HTML
+    # 修改提示词：增加字数要求到2000-2500字
     prompt = f"""
 请以专业教师的身份，为{student_type}写一篇关于'{topic}'的详细学习文章，重点角度是：{angle}。
 
 写作要求：
 1. 面向{student_type}，{difficulty}
 2. 科目重点：{subject}，角度重点：{angle}
-3. 字数：1200-1500字
+3. 字数：2000-2500字
 4. 内容结构要求：
    - 开头：直接生动引入主题，说明学习重要性
-   - 知识讲解：详细讲解核心知识点，包含2-3个具体例子
+   - 知识讲解：详细讲解核心知识点，包含4-5个具体例子
    - 方法指导：提供实用的学习方法和技巧
-   - 实践应用：设计3-4个练习题或实践活动
+   - 实践应用：设计5-6个练习题或实践活动
    - 常见问题：分析学生常见错误和解决方法
    - 拓展学习：提供相关的拓展知识和资源推荐
    - 总结：回顾重点，给出学习建议
@@ -848,7 +848,10 @@ def get_zhipu_ai_content(topic, category, angle):
 7. 使用干净的HTML格式，只使用以下标签：<h2>, <h3>, <h4>, <p>, <ul>, <li>, <strong>, <em>
 8. 特别注意：不要使用任何特殊字符、图片标签、表格标签或其他复杂HTML标签
 9. 文章开头不要有过多空行，标题和正文之间最多只能有1行空行
-10. 文章内容要紧凑，段落之间使用正常的间距
+10. 文章内容要详细丰富，确保字数达到2000字以上
+11. 每个知识点都要有详细的解释和至少2个例子
+12. 学习方法部分要具体可行，包含步骤说明
+13. 练习题要包含详细的解题步骤和答案
 
 请直接开始文章写作，不要有任何前言或说明：
     """
@@ -858,7 +861,7 @@ def get_zhipu_ai_content(topic, category, angle):
         "messages": [
             {
                 "role": "system", 
-                "content": f"你是一个经验丰富的{grade}教师，擅长用适当的语言解释复杂概念，能够激发学生的学习兴趣，同时保持内容的专业性和深度。特别注意：只使用简单干净的HTML标签，不要添加任何特殊字符或复杂格式。"
+                "content": f"你是一个经验丰富的{grade}教师，擅长用适当的语言解释复杂概念，能够激发学生的学习兴趣，同时保持内容的专业性和深度。特别注意：只使用简单干净的HTML标签，不要添加任何特殊字符或复杂格式。文章要详细丰富，确保内容充实。"
             },
             {
                 "role": "user", 
@@ -866,11 +869,11 @@ def get_zhipu_ai_content(topic, category, angle):
             }
         ],
         "temperature": 0.8,
-        "max_tokens": 2000
+        "max_tokens": 3000  # 增加token数量
     }
     
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=60)
+        response = requests.post(url, headers=headers, json=data, timeout=90)  # 增加超时时间
         if response.status_code == 200:
             result = response.json()
             content = result['choices'][0]['message']['content'].strip()
@@ -962,46 +965,6 @@ def generate_complete_seo_data(title, content, tags, category):
     except Exception as e:
         print(f"❌ 生成SEO数据失败: {e}")
         return None
-
-def update_wordpress_site_name():
-    """更新WordPress网站名称"""
-    try:
-        # 获取设置
-        settings_url = WORDPRESS_URL.rstrip('/') + '/wp-json/wp/v2/settings'
-        auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
-        
-        # 获取当前设置
-        response = requests.get(settings_url, auth=auth, timeout=10)
-        
-        if response.status_code == 200:
-            current_settings = response.json()
-            current_title = current_settings.get('title', '')
-            
-            if current_title != "格物智库":
-                # 更新网站名称
-                update_data = {
-                    'title': '格物智库',
-                    'description': '掌握学习的底层逻辑 | 全龄段教育资源与高效工具平台|免费教育资源下载',
-                }
-                
-                update_response = requests.post(settings_url, json=update_data, auth=auth, timeout=10)
-                
-                if update_response.status_code == 200:
-                    print("✅ 网站名称已更新为: 格物智库")
-                    return True
-                else:
-                    print(f"⚠️  更新网站名称失败: {update_response.status_code}")
-                    return False
-            else:
-                print("✅ 网站名称已经是: 格物智库")
-                return True
-        else:
-            print(f"❌ 无法获取网站设置: {response.status_code}")
-            return False
-            
-    except Exception as e:
-        print(f"❌ 更新网站名称异常: {e}")
-        return False
 
 def update_yoast_seo(post_id, seo_data):
     """更新文章的Yoast SEO信息"""
@@ -1221,20 +1184,6 @@ def main():
     if not all([ZHIPU_API_KEY, WORDPRESS_URL, WORDPRESS_USER, WORDPRESS_PASSWORD]):
         print("❌ 错误：缺少必要的环境变量配置")
         return False
-    
-    # 更新网站名称
-    print("\n🏷️  更新网站名称...")
-    update_wordpress_site_name()
-    
-    # 询问操作
-    print("\n请选择操作:")
-    print("1. 发布新文章")
-    print("2. 修复网站名称")
-    
-    choice = input("请输入选择 (1/2): ").strip()
-    
-    if choice == "2":
-        return update_wordpress_site_name()
     
     # 发布新文章
     print("\n📝 正在选择文章主题...")
