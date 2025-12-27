@@ -780,7 +780,7 @@ def insert_images_into_content(content, images_data):
     return content_with_images
 
 def get_zhipu_ai_content(topic, category, angle):
-    """使用智谱AI生成丰富内容的文章 - 增加字数到2000-2500字"""
+    """使用智谱AI生成丰富内容的文章 - 修复内容截断问题"""
     if not ZHIPU_API_KEY:
         print("❌ 智谱API密钥未设置")
         return None
@@ -826,34 +826,68 @@ def get_zhipu_ai_content(topic, category, angle):
     else:
         difficulty = "适合小学生阅读，语言亲切易懂但专业"
     
-    # 修改提示词：增加字数要求到2000-2500字
+    # 修复提示词：要求AI生成完整的长文章
     prompt = f"""
 请以专业教师的身份，为{student_type}写一篇关于'{topic}'的详细学习文章，重点角度是：{angle}。
 
-写作要求：
+**重要：请生成一篇完整的、结构完整的文章，不要中途停止！**
+
+**写作要求：**
 1. 面向{student_type}，{difficulty}
 2. 科目重点：{subject}，角度重点：{angle}
-3. 字数：2000-2500字
-4. 内容结构要求：
-   - 开头：直接生动引入主题，说明学习重要性
-   - 知识讲解：详细讲解核心知识点，包含4-5个具体例子
-   - 方法指导：提供实用的学习方法和技巧
-   - 实践应用：设计5-6个练习题或实践活动
-   - 常见问题：分析学生常见错误和解决方法
-   - 拓展学习：提供相关的拓展知识和资源推荐
-   - 总结：回顾重点，给出学习建议
+3. **字数：至少2000字，请确保内容完整**
+4. **内容结构要求（必须包含以下所有部分）：**
+
+   **一、引言部分**
+   - 生动的开头，引入主题
+   - 说明学习这个话题的重要性和实际应用
+   - 激发学生的兴趣
+
+   **二、核心知识讲解（详细讲解）**
+   - 基本概念定义
+   - 3-5个核心知识点，每个知识点都要有：
+     * 详细的解释
+     * 至少2个具体例子
+     * 与日常生活相关的应用
+   - 如果适用，包含图表说明
+
+   **三、学习方法指导**
+   - 提供3-4种实用的学习方法
+   - 每种方法都要有具体的步骤说明
+   - 学习技巧和记忆方法
+   - 如何避免常见错误
+
+   **四、实践应用与练习**
+   - 设计5-6个练习题，从易到难
+   - 每个练习题都要有：
+     * 题目
+     * 详细的解题步骤
+     * 最终答案
+   - 实践活动建议
+
+   **五、常见问题与解答**
+   - 列出学生常见的5-6个问题
+   - 每个问题都要有详细的解答
+   - 提供避免这些问题的方法
+
+   **六、拓展学习**
+   - 相关的进阶知识
+   - 推荐的学习资源
+   - 如何将这个知识点与其他知识点联系起来
+
+   **七、总结与建议**
+   - 回顾重点内容
+   - 给出学习建议
+   - 鼓励学生继续深入学习
 
 5. 包含丰富的实例和案例分析
 6. 语言生动有趣，适合{student_type}阅读但内容专业
 7. 使用干净的HTML格式，只使用以下标签：<h2>, <h3>, <h4>, <p>, <ul>, <li>, <strong>, <em>
 8. 特别注意：不要使用任何特殊字符、图片标签、表格标签或其他复杂HTML标签
 9. 文章开头不要有过多空行，标题和正文之间最多只能有1行空行
-10. 文章内容要详细丰富，确保字数达到2000字以上
-11. 每个知识点都要有详细的解释和至少2个例子
-12. 学习方法部分要具体可行，包含步骤说明
-13. 练习题要包含详细的解题步骤和答案
+10. **确保文章完整，不要中途结束**
 
-请直接开始文章写作，不要有任何前言或说明：
+**请生成完整的、结构完整的文章，不要只写一部分就停止。** 请直接开始文章写作，不要有任何前言或说明：
     """
     
     data = {
@@ -861,23 +895,48 @@ def get_zhipu_ai_content(topic, category, angle):
         "messages": [
             {
                 "role": "system", 
-                "content": f"你是一个经验丰富的{grade}教师，擅长用适当的语言解释复杂概念，能够激发学生的学习兴趣，同时保持内容的专业性和深度。特别注意：只使用简单干净的HTML标签，不要添加任何特殊字符或复杂格式。文章要详细丰富，确保内容充实。"
+                "content": f"你是一个经验丰富的{grade}教师，擅长用适当的语言解释复杂概念，能够激发学生的学习兴趣，同时保持内容的专业性和深度。特别注意：1. 必须生成完整的长文章，至少2000字；2. 必须包含所有要求的部分；3. 只使用简单干净的HTML标签；4. 不要添加任何特殊字符或复杂格式。"
             },
             {
                 "role": "user", 
                 "content": prompt
             }
         ],
-        "temperature": 0.8,
-        "max_tokens": 3000  # 增加token数量
+        "temperature": 0.7,  # 降低温度以获得更稳定的输出
+        "max_tokens": 4000,  # 增加token数量
+        "stream": False
     }
     
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=90)  # 增加超时时间
+        print(f"🤖 正在调用AI生成内容，请求参数: max_tokens={data['max_tokens']}")
+        response = requests.post(url, headers=headers, json=data, timeout=120)  # 增加超时时间
+        
         if response.status_code == 200:
             result = response.json()
             content = result['choices'][0]['message']['content'].strip()
-            print(f"✅ AI生成内容长度: {len(content)}字符")
+            
+            # 检查内容是否完整
+            content_length = len(content)
+            print(f"✅ AI生成内容长度: {content_length}字符")
+            
+            if content_length < 1000:
+                print(f"⚠️  警告：生成的内容可能不完整，只有{content_length}字符")
+            
+            # 检查是否包含所有必要的部分
+            required_sections = ["引言", "核心知识", "学习方法", "实践应用", "常见问题", "拓展学习", "总结"]
+            missing_sections = []
+            
+            for section in required_sections:
+                if section in content:
+                    pass
+                elif "一、" in content or "二、" in content or "1." in content:
+                    # 如果有其他结构，认为是完整的
+                    pass
+                else:
+                    missing_sections.append(section)
+            
+            if missing_sections:
+                print(f"⚠️  警告：可能缺少以下部分: {', '.join(missing_sections)}")
             
             # 清理HTML内容
             cleaned_content = clean_html_content(content)
@@ -888,7 +947,7 @@ def get_zhipu_ai_content(topic, category, angle):
             return cleaned_content
         else:
             print(f"❌ API请求失败: {response.status_code}")
-            print(f"错误详情: {response.text}")
+            print(f"错误详情: {response.text[:200]}")
             return None
     except Exception as e:
         print(f"❌ AI生成失败: {e}")
