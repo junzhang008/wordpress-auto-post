@@ -890,93 +890,183 @@ def get_zhipu_ai_content(topic, category, angle):
         return None
 
 def generate_seo_data(title, content, tags, category):
-    """生成Yoast SEO相关数据"""
+    """生成完整的SEO数据，包括所有必要的字段"""
     try:
         # 提取SEO标题
         site_name = "GoGewu格物智库"
         seo_title = f"{title} - {site_name}"
         
-        # 从内容中提取纯文本前155个字符作为描述
+        # 从内容中提取纯文本
         plain_text = re.sub(r'<[^>]+>', '', content)
-        plain_text = re.sub(r'\s+', ' ', plain_text)  # 将多个空格/换行符替换为单个空格
-        plain_text = plain_text.strip()
+        plain_text = re.sub(r'\s+', ' ', plain_text).strip()
         
-        # 截取合适的描述长度
-        if len(plain_text) > 155:
-            # 寻找句子结束点
-            if '.' in plain_text[:155]:
-                end_pos = plain_text[:155].rfind('.') + 1
-                seo_description = plain_text[:end_pos].strip()
-            else:
-                seo_description = plain_text[:150].strip() + "..."
+        # 生成SEO描述（155-160字符）
+        if len(plain_text) > 160:
+            # 尝试找到句子结束点
+            end_positions = [
+                plain_text[:160].rfind('。') + 1 if plain_text[:160].rfind('。') > 0 else None,
+                plain_text[:160].rfind('！') + 1 if plain_text[:160].rfind('！') > 0 else None,
+                plain_text[:160].rfind('？') + 1 if plain_text[:160].rfind('？') > 0 else None,
+                plain_text[:160].rfind('；') + 1 if plain_text[:160].rfind('；') > 0 else None,
+                155
+            ]
+            
+            # 找到第一个有效的结束位置
+            end_pos = 155
+            for pos in end_positions:
+                if pos is not None and pos > 50:
+                    end_pos = pos
+                    break
+            
+            seo_description = plain_text[:end_pos].strip()
         else:
             seo_description = plain_text
         
-        # 生成焦点关键词（从标题或标签中选择）
-        focus_keyword = ""
+        # 确保描述长度合适
+        if len(seo_description) < 50:
+            seo_description = f"本文详细讲解{title}的概念、应用和解题方法，帮助{category[:3]}学生掌握相关知识。"
+        elif len(seo_description) > 160:
+            seo_description = seo_description[:157] + "..."
+        
+        # 生成焦点关键词
         if tags and len(tags) > 0:
-            # 优先选择较短的标签作为关键词
-            short_tags = [tag for tag in tags if len(tag) <= 6]
-            if short_tags:
-                focus_keyword = short_tags[0]
+            # 从标题和标签中选择关键词
+            title_keywords = extract_keywords_from_title(title)
+            if title_keywords:
+                focus_keyword = title_keywords[0]
             else:
+                # 从标签中选择
                 focus_keyword = tags[0]
         else:
-            # 从标题中提取关键词
-            title_words = jieba.lcut(title)
-            focus_keyword = title_words[0] if title_words else title[:4]
+            focus_keyword = title[:6] if len(title) > 6 else title
         
-        # 创建完整的Yoast SEO数据结构
+        # 创建完整的SEO数据结构
         seo_data = {
-            "yoast_wpseo_title": seo_title,
+            # 标准的HTML meta description（最重要！）
             "yoast_wpseo_metadesc": seo_description,
+            
+            # Yoast SEO标题
+            "yoast_wpseo_title": seo_title,
+            
+            # 焦点关键词
             "yoast_wpseo_focuskw": focus_keyword,
-            "yoast_wpseo_meta-robots-noindex": "0",  # 0表示不禁止索引
-            "yoast_wpseo_meta-robots-nofollow": "0",  # 0表示允许跟踪
-            "yoast_wpseo_canonical": "",  # 留空表示使用默认
+            
+            # Robots设置
+            "yoast_wpseo_meta-robots-noindex": "0",
+            "yoast_wpseo_meta-robots-nofollow": "0",
+            "yoast_wpseo_meta-robots-adv": "",
+            
+            # Canonical URL
+            "yoast_wpseo_canonical": "",
+            
+            # Open Graph数据
             "yoast_wpseo_opengraph-title": seo_title,
             "yoast_wpseo_opengraph-description": seo_description,
+            "yoast_wpseo_opengraph-image": "",
+            "yoast_wpseo_opengraph-image-id": "",
+            
+            # Twitter卡片数据
             "yoast_wpseo_twitter-title": seo_title,
             "yoast_wpseo_twitter-description": seo_description,
+            "yoast_wpseo_twitter-image": "",
+            
+            # Schema结构化数据
+            "yoast_wpseo_schema_article_type": "Article",
+            "yoast_wpseo_schema_page_type": "WebPage",
+            
+            # 其他Yoast字段
+            "yoast_wpseo_content_score": "90",
+            "yoast_wpseo_estimated-reading-time-minutes": "",
+            "yoast_wpseo_wordproof_timestamp": "",
+            
+            # 作者信息
+            "yoast_wpseo_authorship": "1",
+            
+            # 面包屑导航
+            "yoast_wpseo_bctitle": "",
+            
+            # 站点名称
+            "yoast_wpseo_sitename": site_name,
         }
         
-        print(f"🔍 生成SEO数据:")
+        print(f"🔍 生成完整的SEO数据:")
+        print(f"  - Meta描述: {seo_description}")
         print(f"  - SEO标题: {seo_title}")
-        print(f"  - SEO描述: {seo_description[:60]}...")
         print(f"  - 焦点关键词: {focus_keyword}")
+        print(f"  - 描述长度: {len(seo_description)}字符")
         
         return seo_data
         
     except Exception as e:
         print(f"❌ 生成SEO数据失败: {e}")
-        return None
+        # 返回基础SEO数据
+        return {
+            "yoast_wpseo_metadesc": f"本文详细讲解{title}的概念、应用和解题方法，帮助{category[:3]}学生掌握相关知识。",
+            "yoast_wpseo_title": f"{title} - {site_name}",
+            "yoast_wpseo_focuskw": title[:4] if len(title) > 4 else title,
+        }
 
-def update_yoast_seo(post_id, seo_data):
-    """更新文章的Yoast SEO信息"""
+
+def ensure_seo_compatibility(post_id, title, content, tags, category):
+    """确保SEO信息完全兼容Yoast SEO"""
     try:
-        update_url = WORDPRESS_URL.rstrip('/') + f'/wp-json/wp/v2/posts/{post_id}'
+        api_url = WORDPRESS_URL.rstrip('/') + f'/wp-json/wp/v2/posts/{post_id}'
         auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
         
+        # 生成完整的SEO数据
+        seo_data = generate_seo_data(title, content, tags, category)
+        
         if not seo_data:
-            print("⚠️  没有SEO数据需要更新")
+            print(f"❌ 无法生成SEO数据")
             return False
         
-        # WordPress REST API中，Yoast SEO数据通常通过meta字段设置
+        # 首先检查当前的SEO设置
+        print("🔍 检查当前SEO设置...")
+        response = requests.get(api_url, auth=auth, timeout=10)
+        
+        if response.status_code == 200:
+            current_post = response.json()
+            current_meta = current_post.get('meta', {})
+            
+            # 检查是否缺少关键的meta description
+            if 'yoast_wpseo_metadesc' not in current_meta or not current_meta['yoast_wpseo_metadesc']:
+                print("⚠️  检测到缺少Meta描述，正在修复...")
+            else:
+                print(f"✅ 当前有Meta描述: {current_meta.get('yoast_wpseo_metadesc', '')[:50]}...")
+        
+        # 更新SEO数据
         update_data = {
             'meta': seo_data
         }
         
-        response = requests.post(update_url, json=update_data, auth=auth, timeout=10)
+        update_response = requests.post(api_url, json=update_data, auth=auth, timeout=10)
         
-        if response.status_code == 200:
-            print("✅ Yoast SEO信息更新成功")
+        if update_response.status_code == 200:
+            print("✅ SEO信息更新成功！")
+            print(f"   包含以下字段: {', '.join(seo_data.keys())}")
             return True
         else:
-            print(f"⚠️  Yoast SEO信息更新失败: {response.status_code}")
+            print(f"❌ SEO信息更新失败: {update_response.status_code}")
+            print(f"   响应: {update_response.text[:200]}")
             return False
             
     except Exception as e:
-        print(f"❌ 更新Yoast SEO异常: {e}")
+        print(f"❌ 确保SEO兼容性异常: {e}")
+        return False
+
+
+def update_post_with_complete_seo(post_id, title, content, tags, category):
+    """更新文章，确保SEO信息完整"""
+    print(f"🔄 更新文章 {post_id} 的SEO信息...")
+    
+    # 1. 确保基本的meta description存在
+    success = ensure_seo_compatibility(post_id, title, content, tags, category)
+    
+    if success:
+        print("✅ 文章SEO信息已完整设置")
+        return True
+    else:
+        print("⚠️  可能无法完全设置SEO信息，但基本功能正常")
         return False
 
 def process_images_for_article(category, topic, content, post_id):
