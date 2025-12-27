@@ -513,7 +513,9 @@ def get_unsplash_image(keywords):
             " ".join(keywords[:2]),
             " ".join(keywords[2:4]),
             keywords[0] + " education",
-            "learning " + keywords[1]
+            "learning " + keywords[1],
+            keywords[0] + " student",
+            keywords[0] + " school"
         ]
         
         keyword = random.choice(keyword_combinations)
@@ -545,35 +547,67 @@ def get_unsplash_image(keywords):
 
 def get_stock_image(keywords):
     """获取免费库存图片（备用方案）"""
-    # 使用多个免费图库源
-    education_images = [
-        # 学习相关
-        "https://images.unsplash.com/photo-1497636577773-f1231844b336?w=800",
-        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
-        "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800",
-        "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
-        "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=800",
-        # 数学相关
-        "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?w=800",
-        # 语文相关
-        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800",
-        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800",
-        # 英语相关
-        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
-        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
-        # 物理化学相关
-        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
-        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
-        # 大学相关
-        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
-        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800"
-    ]
-    
-    return random.choice(education_images)
+    # 根据关键词选择合适的图片
+    if "数学" in keywords or "计算" in keywords or "公式" in keywords:
+        math_images = [
+            "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
+            "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?w=800",
+            "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
+            "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800"
+        ]
+        return random.choice(math_images)
+    elif "语文" in keywords or "阅读" in keywords or "书籍" in keywords:
+        chinese_images = [
+            "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800",
+            "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800",
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800",
+            "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800"
+        ]
+        return random.choice(chinese_images)
+    elif "英语" in keywords or "字母" in keywords or "单词" in keywords:
+        english_images = [
+            "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+            "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
+            "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+            "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800"
+        ]
+        return random.choice(english_images)
+    elif "物理" in keywords or "实验" in keywords or "科学" in keywords:
+        physics_images = [
+            "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+            "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+            "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+            "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800"
+        ]
+        return random.choice(physics_images)
+    elif "化学" in keywords or "实验" in keywords or "实验室" in keywords:
+        chemistry_images = [
+            "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+            "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+            "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+            "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800"
+        ]
+        return random.choice(chemistry_images)
+    elif "大学" in keywords or "学术" in keywords or "研究" in keywords:
+        university_images = [
+            "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+            "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+            "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+            "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800"
+        ]
+        return random.choice(university_images)
+    else:
+        # 默认返回学习相关图片
+        education_images = [
+            "https://images.unsplash.com/photo-1497636577773-f1231844b336?w=800",
+            "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
+            "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800",
+            "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800"
+        ]
+        return random.choice(education_images)
 
 def upload_image_to_wordpress(image_url, title, alt_text=""):
-    """上传图片到WordPress并返回媒体ID"""
+    """上传图片到WordPress并返回媒体ID和图片信息"""
     try:
         # 下载图片
         response = requests.get(image_url, timeout=15)
@@ -609,7 +643,14 @@ def upload_image_to_wordpress(image_url, title, alt_text=""):
         if upload_response.status_code == 201:
             media_data = upload_response.json()
             media_id = media_data['id']
+            
+            # 获取上传到WordPress后的图片URL
+            media_url = media_data.get('source_url')
+            if not media_url:
+                media_url = media_data.get('guid', {}).get('rendered', image_url)
+            
             print(f"✅ 图片上传成功，媒体ID: {media_id}")
+            print(f"   WordPress图片URL: {media_url}")
             
             # 更新图片的alt文本和标题
             update_data = {
@@ -624,7 +665,12 @@ def upload_image_to_wordpress(image_url, title, alt_text=""):
                 timeout=10
             )
             
-            return media_id
+            return {
+                'media_id': media_id,
+                'media_url': media_url,
+                'title': title,
+                'alt_text': alt_text or title
+            }
         else:
             print(f"❌ 图片上传失败: {upload_response.status_code}")
             return None
@@ -661,7 +707,7 @@ def insert_images_into_content(content, images_data):
     if not images_data:
         return content
     
-    # 图片HTML模板
+    # 图片HTML模板 - 使用WordPress媒体库的URL
     image_template = '''
 <div class="article-image" style="margin: 30px 0; text-align: center;">
     <img src="{image_url}" alt="{alt_text}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
@@ -689,7 +735,7 @@ def insert_images_into_content(content, images_data):
         if i in insert_positions and image_index < len(images_data):
             image_info = images_data[image_index]
             image_html = image_template.format(
-                image_url=image_info['url'],
+                image_url=image_info['media_url'],  # 使用WordPress媒体库的URL
                 alt_text=image_info['alt_text'],
                 caption=image_info['caption']
             )
@@ -820,21 +866,22 @@ def process_images_for_article(category, topic, content, post_id):
                 alt_text = f"{topic} - {image_type}"
                 caption = f"{image_type}: {topic}"
                 
-                media_id = upload_image_to_wordpress(image_url, f"{topic}_{image_type}", alt_text)
+                # 修改这里：获取上传结果，包含media_id和media_url
+                upload_result = upload_image_to_wordpress(image_url, f"{topic}_{image_type}", alt_text)
                 
-                if media_id:
+                if upload_result:
                     images_data.append({
-                        'url': image_url,
+                        'media_url': upload_result['media_url'],  # 使用WordPress媒体库的URL
                         'alt_text': alt_text,
                         'caption': caption,
-                        'media_id': media_id,
+                        'media_id': upload_result['media_id'],
                         'type': image_type
                     })
                     print(f"✅ 成功处理图片 {i+1}: {image_type}")
                 
                 # 如果是第一张图片，设置为特色图片
-                if i == 0 and media_id:
-                    add_featured_image(post_id, media_id)
+                if i == 0 and upload_result and 'media_id' in upload_result:
+                    add_featured_image(post_id, upload_result['media_id'])
             
             # 添加延迟避免请求过快
             time.sleep(1)
@@ -867,10 +914,11 @@ def post_to_wordpress_with_tags(title, content, category, slug):
         # 获取分类ID
         category_id = CATEGORY_MAP.get(category, 1)
         
+        # 先发布不含图片的文章
         post_data = {
             'title': title,
             'content': content,
-            'status': 'publish',
+            'status': 'draft',  # 先保存为草稿
             'categories': [category_id],
             'slug': slug
         }
@@ -890,16 +938,17 @@ def post_to_wordpress_with_tags(title, content, category, slug):
         if response.status_code == 201:
             post_data = response.json()
             post_id = post_data['id']
-            print(f"✅ 文章发布成功！文章ID: {post_id}")
+            print(f"✅ 文章保存为草稿成功！文章ID: {post_id}")
             
             # 处理图片（在文章发布后）
             print("🖼️  开始处理文章图片...")
             updated_content, images_data = process_images_for_article(category, title, content, post_id)
             
-            # 如果有图片且内容被更新，更新文章内容
+            # 更新文章内容，包含图片，并发布
             if updated_content != content and images_data:
                 update_data = {
-                    'content': updated_content
+                    'content': updated_content,
+                    'status': 'publish'  # 更新为发布状态
                 }
                 update_response = requests.post(
                     f"{api_url}/{post_id}",
@@ -908,9 +957,30 @@ def post_to_wordpress_with_tags(title, content, category, slug):
                     timeout=10
                 )
                 if update_response.status_code == 200:
-                    print("✅ 文章内容已更新包含图片")
+                    print("✅ 文章已更新包含图片并发布")
                 else:
-                    print("⚠️  文章内容更新失败")
+                    print(f"⚠️  文章内容更新失败: {update_response.status_code}")
+                    # 如果更新失败，至少将草稿发布
+                    update_data = {'status': 'publish'}
+                    update_response = requests.post(
+                        f"{api_url}/{post_id}",
+                        json=update_data,
+                        auth=auth,
+                        timeout=10
+                    )
+                    if update_response.status_code == 200:
+                        print("✅ 文章已发布（不含图片更新）")
+            else:
+                # 如果没有图片，直接发布草稿
+                update_data = {'status': 'publish'}
+                update_response = requests.post(
+                    f"{api_url}/{post_id}",
+                    json=update_data,
+                    auth=auth,
+                    timeout=10
+                )
+                if update_response.status_code == 200:
+                    print("✅ 文章已发布（不含图片）")
             
             return True
         else:
