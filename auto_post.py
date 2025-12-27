@@ -889,8 +889,8 @@ def get_zhipu_ai_content(topic, category, angle):
         print(f"❌ AI生成失败: {e}")
         return None
 
-def generate_seo_data(title, content, tags, category):
-    """生成完整的SEO数据，包括所有必要的字段"""
+def generate_complete_seo_data(title, content, tags, category):
+    """生成完整的SEO数据，包括所有必要的Yoast SEO字段"""
     try:
         # 提取SEO标题
         site_name = "GoGewu格物智库"
@@ -942,51 +942,30 @@ def generate_seo_data(title, content, tags, category):
         
         # 创建完整的SEO数据结构
         seo_data = {
-            # 标准的HTML meta description（最重要！）
-            "yoast_wpseo_metadesc": seo_description,
+            # Yoast SEO核心字段
+            "_yoast_wpseo_title": seo_title,
+            "_yoast_wpseo_metadesc": seo_description,
+            "_yoast_wpseo_focuskw": focus_keyword,
+            "_yoast_wpseo_meta-robots-noindex": "0",
+            "_yoast_wpseo_meta-robots-nofollow": "0",
             
-            # Yoast SEO标题
-            "yoast_wpseo_title": seo_title,
+            # Open Graph字段
+            "_yoast_wpseo_opengraph-title": seo_title,
+            "_yoast_wpseo_opengraph-description": seo_description,
+            "_yoast_wpseo_opengraph-image": "",
             
-            # 焦点关键词
-            "yoast_wpseo_focuskw": focus_keyword,
+            # Twitter字段
+            "_yoast_wpseo_twitter-title": seo_title,
+            "_yoast_wpseo_twitter-description": seo_description,
+            "_yoast_wpseo_twitter-image": "",
             
-            # Robots设置
-            "yoast_wpseo_meta-robots-noindex": "0",
-            "yoast_wpseo_meta-robots-nofollow": "0",
-            "yoast_wpseo_meta-robots-adv": "",
-            
-            # Canonical URL
-            "yoast_wpseo_canonical": "",
-            
-            # Open Graph数据
-            "yoast_wpseo_opengraph-title": seo_title,
-            "yoast_wpseo_opengraph-description": seo_description,
-            "yoast_wpseo_opengraph-image": "",
-            "yoast_wpseo_opengraph-image-id": "",
-            
-            # Twitter卡片数据
-            "yoast_wpseo_twitter-title": seo_title,
-            "yoast_wpseo_twitter-description": seo_description,
-            "yoast_wpseo_twitter-image": "",
+            # 额外的重要字段
+            "_yoast_wpseo_canonical": "",
+            "_yoast_wpseo_meta-robots-adv": "",
             
             # Schema结构化数据
-            "yoast_wpseo_schema_article_type": "Article",
-            "yoast_wpseo_schema_page_type": "WebPage",
-            
-            # 其他Yoast字段
-            "yoast_wpseo_content_score": "90",
-            "yoast_wpseo_estimated-reading-time-minutes": "",
-            "yoast_wpseo_wordproof_timestamp": "",
-            
-            # 作者信息
-            "yoast_wpseo_authorship": "1",
-            
-            # 面包屑导航
-            "yoast_wpseo_bctitle": "",
-            
-            # 站点名称
-            "yoast_wpseo_sitename": site_name,
+            "_yoast_wpseo_schema_article_type": "Article",
+            "_yoast_wpseo_schema_page_type": "WebPage",
         }
         
         print(f"🔍 生成完整的SEO数据:")
@@ -1001,26 +980,26 @@ def generate_seo_data(title, content, tags, category):
         print(f"❌ 生成SEO数据失败: {e}")
         # 返回基础SEO数据
         return {
-            "yoast_wpseo_metadesc": f"本文详细讲解{title}的概念、应用和解题方法，帮助{category[:3]}学生掌握相关知识。",
-            "yoast_wpseo_title": f"{title} - {site_name}",
-            "yoast_wpseo_focuskw": title[:4] if len(title) > 4 else title,
+            "_yoast_wpseo_title": f"{title} - {site_name}",
+            "_yoast_wpseo_metadesc": f"本文详细讲解{title}的概念、应用和解题方法，帮助{category[:3]}学生掌握相关知识。",
+            "_yoast_wpseo_focuskw": title[:4] if len(title) > 4 else title,
         }
 
 
-def ensure_seo_compatibility(post_id, title, content, tags, category):
-    """确保SEO信息完全兼容Yoast SEO"""
+def update_yoast_seo_with_complete_fields(post_id, title, content, tags, category):
+    """使用完整的Yoast SEO字段更新文章"""
     try:
         api_url = WORDPRESS_URL.rstrip('/') + f'/wp-json/wp/v2/posts/{post_id}'
         auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
         
         # 生成完整的SEO数据
-        seo_data = generate_seo_data(title, content, tags, category)
+        seo_data = generate_complete_seo_data(title, content, tags, category)
         
         if not seo_data:
             print(f"❌ 无法生成SEO数据")
             return False
         
-        # 首先检查当前的SEO设置
+        # 检查当前文章的SEO设置
         print("🔍 检查当前SEO设置...")
         response = requests.get(api_url, auth=auth, timeout=10)
         
@@ -1029,10 +1008,10 @@ def ensure_seo_compatibility(post_id, title, content, tags, category):
             current_meta = current_post.get('meta', {})
             
             # 检查是否缺少关键的meta description
-            if 'yoast_wpseo_metadesc' not in current_meta or not current_meta['yoast_wpseo_metadesc']:
+            if '_yoast_wpseo_metadesc' not in current_meta or not current_meta['_yoast_wpseo_metadesc']:
                 print("⚠️  检测到缺少Meta描述，正在修复...")
             else:
-                print(f"✅ 当前有Meta描述: {current_meta.get('yoast_wpseo_metadesc', '')[:50]}...")
+                print(f"✅ 当前有Meta描述: {current_meta.get('_yoast_wpseo_metadesc', '')[:50]}...")
         
         # 更新SEO数据
         update_data = {
@@ -1042,32 +1021,41 @@ def ensure_seo_compatibility(post_id, title, content, tags, category):
         update_response = requests.post(api_url, json=update_data, auth=auth, timeout=10)
         
         if update_response.status_code == 200:
-            print("✅ SEO信息更新成功！")
-            print(f"   包含以下字段: {', '.join(seo_data.keys())}")
+            print("✅ Yoast SEO信息已完整更新！")
+            print(f"   已设置的关键SEO字段:")
+            print(f"   1. _yoast_wpseo_title: {seo_data.get('_yoast_wpseo_title')}")
+            print(f"   2. _yoast_wpseo_metadesc: {seo_data.get('_yoast_wpseo_metadesc')[:60]}...")
+            print(f"   3. _yoast_wpseo_focuskw: {seo_data.get('_yoast_wpseo_focuskw')}")
             return True
         else:
-            print(f"❌ SEO信息更新失败: {update_response.status_code}")
-            print(f"   响应: {update_response.text[:200]}")
+            print(f"❌ Yoast SEO信息更新失败: {update_response.status_code}")
             return False
             
     except Exception as e:
-        print(f"❌ 确保SEO兼容性异常: {e}")
+        print(f"❌ 更新Yoast SEO异常: {e}")
         return False
 
 
-def update_post_with_complete_seo(post_id, title, content, tags, category):
-    """更新文章，确保SEO信息完整"""
-    print(f"🔄 更新文章 {post_id} 的SEO信息...")
+def ensure_seo_fields_in_post_creation(title, content, category, slug):
+    """在文章创建时确保包含所有必要的SEO字段"""
+    # 生成智能标签名称
+    tag_names = generate_smart_tags(category, content, title)
     
-    # 1. 确保基本的meta description存在
-    success = ensure_seo_compatibility(post_id, title, content, tags, category)
+    # 生成完整的SEO数据
+    seo_data = generate_complete_seo_data(title, content, tag_names, category)
     
-    if success:
-        print("✅ 文章SEO信息已完整设置")
-        return True
-    else:
-        print("⚠️  可能无法完全设置SEO信息，但基本功能正常")
-        return False
+    # 在发布数据中包含SEO数据
+    post_data = {
+        'title': title,
+        'content': content,
+        'status': 'draft',
+        'slug': slug,
+    }
+    
+    if seo_data:
+        post_data['meta'] = seo_data
+    
+    return post_data, seo_data
 
 def process_images_for_article(category, topic, content, post_id):
     """为文章处理多张图片"""
