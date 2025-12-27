@@ -891,83 +891,117 @@ def get_zhipu_ai_content(topic, category, angle):
         print(f"❌ AI生成失败: {e}")
         return None
 
-def generate_seo_data(title, content, tags, category):
-    """生成Yoast SEO相关数据"""
+def generate_complete_seo_data(title, content, tags, category):
+    """生成完整的SEO数据"""
     try:
-        # 提取SEO标题
-        site_name = "GoGewu格物智库"
+        # 设置正确的网站名称
+        site_name = "格物智库"
+        
+        # SEO标题
         seo_title = f"{title} - {site_name}"
         
         # 从内容中提取纯文本
         plain_text = re.sub(r'<[^>]+>', '', content)
         plain_text = re.sub(r'\s+', ' ', plain_text).strip()
         
-        # 生成SEO描述（155-160字符）
-        if len(plain_text) > 160:
-            # 尝试找到句子结束点
-            end_positions = [
-                plain_text[:160].rfind('。') + 1 if plain_text[:160].rfind('。') > 0 else None,
-                plain_text[:160].rfind('！') + 1 if plain_text[:160].rfind('！') > 0 else None,
-                plain_text[:160].rfind('？') + 1 if plain_text[:160].rfind('？') > 0 else None,
-                plain_text[:160].rfind('；') + 1 if plain_text[:160].rfind('；') > 0 else None,
-                155
-            ]
-            
-            # 找到第一个有效的结束位置
-            end_pos = 155
-            for pos in end_positions:
-                if pos is not None and pos > 50:
-                    end_pos = pos
-                    break
-            
-            seo_description = plain_text[:end_pos].strip()
+        # 生成SEO描述
+        if len(plain_text) > 155:
+            # 寻找句子结束点
+            if '.' in plain_text[:155]:
+                end_pos = plain_text[:155].rfind('.') + 1
+                seo_description = plain_text[:end_pos].strip()
+            else:
+                seo_description = plain_text[:150].strip() + "..."
         else:
             seo_description = plain_text
         
-        # 确保描述长度合适
-        if len(seo_description) < 50:
+        # 确保描述不为空
+        if not seo_description or len(seo_description) < 20:
             seo_description = f"本文详细讲解{title}的概念、应用和解题方法，帮助{category[:3]}学生掌握相关知识。"
-        elif len(seo_description) > 160:
-            seo_description = seo_description[:157] + "..."
         
         # 生成焦点关键词
         if tags and len(tags) > 0:
-            # 从标题和标签中选择关键词
-            title_keywords = extract_keywords_from_title(title)
-            if title_keywords:
-                focus_keyword = title_keywords[0]
-            else:
-                # 从标签中选择
-                focus_keyword = tags[0]
+            focus_keyword = tags[0]
         else:
             focus_keyword = title[:6] if len(title) > 6 else title
         
-        # 创建完整的SEO数据结构
+        # 创建完整的Yoast SEO数据结构
         seo_data = {
+            # 核心SEO字段
             "_yoast_wpseo_title": seo_title,
             "_yoast_wpseo_metadesc": seo_description,
             "_yoast_wpseo_focuskw": focus_keyword,
             "_yoast_wpseo_meta-robots-noindex": "0",
             "_yoast_wpseo_meta-robots-nofollow": "0",
-            "_yoast_wpseo_canonical": "",
+            
+            # Open Graph
             "_yoast_wpseo_opengraph-title": seo_title,
             "_yoast_wpseo_opengraph-description": seo_description,
-            "_yoast_wpseo_opengraph-image": "",
+            
+            # Twitter
             "_yoast_wpseo_twitter-title": seo_title,
             "_yoast_wpseo_twitter-description": seo_description,
-            "_yoast_wpseo_twitter-image": "",
+            
+            # 其他必要字段
+            "_yoast_wpseo_canonical": "",
+            "_yoast_wpseo_meta-robots-adv": "",
+            
+            # Schema数据
+            "_yoast_wpseo_schema_article_type": "Article",
+            "_yoast_wpseo_schema_page_type": "WebPage",
         }
         
         print(f"🔍 生成SEO数据:")
         print(f"  - SEO标题: {seo_title}")
         print(f"  - SEO描述: {seo_description[:60]}...")
         print(f"  - 焦点关键词: {focus_keyword}")
+        print(f"  - 网站名称: {site_name}")
         
         return seo_data
         
     except Exception as e:
         print(f"❌ 生成SEO数据失败: {e}")
         return None
+
+def update_wordpress_site_name():
+    """更新WordPress网站名称"""
+    try:
+        # 获取设置
+        settings_url = WORDPRESS_URL.rstrip('/') + '/wp-json/wp/v2/settings'
+        auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
+        
+        # 获取当前设置
+        response = requests.get(settings_url, auth=auth, timeout=10)
+        
+        if response.status_code == 200:
+            current_settings = response.json()
+            current_title = current_settings.get('title', '')
+            
+            if current_title != "格物智库":
+                # 更新网站名称
+                update_data = {
+                    'title': '格物智库',
+                    'description': '掌握学习的底层逻辑 | 全龄段教育资源与高效工具平台|免费教育资源下载',
+                }
+                
+                update_response = requests.post(settings_url, json=update_data, auth=auth, timeout=10)
+                
+                if update_response.status_code == 200:
+                    print("✅ 网站名称已更新为: 格物智库")
+                    return True
+                else:
+                    print(f"⚠️  更新网站名称失败: {update_response.status_code}")
+                    return False
+            else:
+                print("✅ 网站名称已经是: 格物智库")
+                return True
+        else:
+            print(f"❌ 无法获取网站设置: {response.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ 更新网站名称异常: {e}")
+        return False
 
 def update_yoast_seo(post_id, seo_data):
     """更新文章的Yoast SEO信息"""
@@ -979,7 +1013,7 @@ def update_yoast_seo(post_id, seo_data):
             print("⚠️  没有SEO数据需要更新")
             return False
         
-        # WordPress REST API中，Yoast SEO数据通常通过meta字段设置
+        # WordPress REST API中，Yoast SEO数据通过meta字段设置
         update_data = {
             'meta': seo_data
         }
@@ -1052,8 +1086,8 @@ def process_images_for_article(category, topic, content, post_id):
         print(f"❌ 图片处理异常: {e}")
         return content, []
 
-def post_to_wordpress_with_tags(title, content, category, slug):
-    """发布到WordPress并自动添加标签和SEO"""
+def post_to_wordpress_with_complete_seo(title, content, category, slug):
+    """发布到WordPress，包含完整的SEO信息"""
     try:
         api_url = WORDPRESS_URL.rstrip('/') + '/wp-json/wp/v2/posts'
         
@@ -1068,14 +1102,14 @@ def post_to_wordpress_with_tags(title, content, category, slug):
         # 获取分类ID
         category_id = CATEGORY_MAP.get(category, 1)
         
-        # 生成SEO数据
-        seo_data = generate_seo_data(title, content, tag_names, category)
+        # 生成完整的SEO数据
+        seo_data = generate_complete_seo_data(title, content, tag_names, category)
         
         # 构建文章数据
         post_data = {
             'title': title,
             'content': content,
-            'status': 'draft',  # 先保存为草稿
+            'status': 'draft',
             'categories': [category_id],
             'slug': slug
         }
@@ -1084,7 +1118,7 @@ def post_to_wordpress_with_tags(title, content, category, slug):
         if tag_ids:
             post_data['tags'] = tag_ids
         
-        # 添加Yoast SEO数据
+        # 添加完整的SEO数据
         if seo_data:
             post_data['meta'] = seo_data
         
@@ -1092,8 +1126,8 @@ def post_to_wordpress_with_tags(title, content, category, slug):
         print(f"  - 标题: {title}")
         print(f"  - 分类: {category}(ID:{category_id})")
         print(f"  - 别名: {slug}")
-        print(f"  - 标签ID数: {len(tag_ids)}")
-        print(f"  - 包含SEO数据: {'是' if seo_data else '否'}")
+        print(f"  - 标签数量: {len(tag_ids)}")
+        print(f"  - SEO标题: {seo_data.get('_yoast_wpseo_title') if seo_data else '无'}")
         
         # 发布文章
         response = requests.post(api_url, json=post_data, auth=auth, timeout=30)
@@ -1103,13 +1137,12 @@ def post_to_wordpress_with_tags(title, content, category, slug):
             post_data = response.json()
             post_id = post_data['id']
             print(f"✅ 文章保存为草稿成功！文章ID: {post_id}")
-            print(f"🔗 文章链接: {WORDPRESS_URL.rstrip('/')}/?p={post_id}")
             
-            # 处理图片（在文章发布后）
+            # 处理图片
             print("🖼️  开始处理文章图片...")
             updated_content, images_data = process_images_for_article(category, title, content, post_id)
             
-            # 更新文章内容，包含图片，并发布
+            # 更新文章内容并发布
             update_needed = False
             update_data = {'status': 'publish'}
             
@@ -1128,18 +1161,7 @@ def post_to_wordpress_with_tags(title, content, category, slug):
                     print("✅ 文章已更新包含图片并发布")
                 else:
                     print(f"⚠️  文章内容更新失败: {update_response.status_code}")
-                    # 如果更新失败，至少将草稿发布
-                    update_data = {'status': 'publish'}
-                    update_response = requests.post(
-                        f"{api_url}/{post_id}",
-                        json=update_data,
-                        auth=auth,
-                        timeout=10
-                    )
-                    if update_response.status_code == 200:
-                        print("✅ 文章已发布（不含图片更新）")
             else:
-                # 如果没有图片更新，直接发布草稿
                 update_response = requests.post(
                     f"{api_url}/{post_id}",
                     json=update_data,
@@ -1147,7 +1169,7 @@ def post_to_wordpress_with_tags(title, content, category, slug):
                     timeout=10
                 )
                 if update_response.status_code == 200:
-                    print("✅ 文章已发布（不含图片）")
+                    print("✅ 文章已发布")
             
             return True, post_id, tag_names
         else:
@@ -1195,64 +1217,60 @@ def main():
     print("🚀 开始自动发布文章流程...")
     print(f"📅 当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
-    # 检查必要的环境变量
+    # 检查环境变量
     if not all([ZHIPU_API_KEY, WORDPRESS_URL, WORDPRESS_USER, WORDPRESS_PASSWORD]):
         print("❌ 错误：缺少必要的环境变量配置")
-        print("请设置以下环境变量：")
-        print("1. ZHIPU_API_KEY: 智谱AI API密钥")
-        print("2. WORDPRESS_URL: WordPress网站地址")
-        print("3. WORDPRESS_USER: WordPress用户名")
-        print("4. WORDPRESS_PASSWORD: WordPress应用密码")
         return False
     
-    # 初始化jieba分词
-    try:
-        jieba.initialize()
-        print("✅ jieba分词器初始化成功")
-    except:
-        print("⚠️  jieba初始化失败，使用简单分词模式")
+    # 更新网站名称
+    print("\n🏷️  更新网站名称...")
+    update_wordpress_site_name()
     
-    # 检查主题库
-    total_topics = sum(len(topics) for topics in TOPICS_BY_CATEGORY.values())
-    print(f"📚 主题库加载完成，共 {len(TOPICS_BY_CATEGORY)} 个分类，{total_topics} 个主题")
+    # 询问操作
+    print("\n请选择操作:")
+    print("1. 发布新文章")
+    print("2. 修复网站名称")
     
-    # 每小时发布1篇文章
-    print("📊 本次发布1篇文章")
+    choice = input("请输入选择 (1/2): ").strip()
     
-    # 智能选择主题和角度
+    if choice == "2":
+        return update_wordpress_site_name()
+    
+    # 发布新文章
+    print("\n📝 正在选择文章主题...")
     category, topic, angle = select_topic_and_angle()
     
     print(f"\n{'='*50}")
-    print(f"📝 正在处理文章")
-    print(f"{'='*50}")
     print(f"📖 分类: {category}")
     print(f"🎯 主题: {topic}")
     print(f"📐 角度: {angle}")
     
-    # 生成随机别名
+    # 生成别名
     slug = generate_random_slug(random.randint(6, 10))
     print(f"🔗 文章别名: {slug}")
     
-    # 获取AI生成内容
-    print("🤖 正在调用AI生成内容...")
+    # 获取AI内容
+    print("\n🤖 正在调用AI生成内容...")
     content = get_zhipu_ai_content(topic, category, angle)
     
     if not content:
-        print("❌ 内容生成失败，跳过此文章")
+        print("❌ 内容生成失败")
         return False
-        
+    
     print(f"✅ 内容生成成功，长度: {len(content)}字符")
     
-    # 发布到WordPress
-    print("🌐 正在发布到 WordPress...")
-    success, post_id, tag_names = post_to_wordpress_with_tags(topic, content, category, slug)
+    # 发布文章
+    print("\n🌐 正在发布到WordPress...")
+    success, post_id, tag_names = post_to_wordpress_with_complete_seo(topic, content, category, slug)
     
     if success:
-        print("🎉 文章发布成功！")
+        print("\n🎉 文章发布成功！")
+        print(f"🔗 文章链接: {WORDPRESS_URL.rstrip('/')}/?p={post_id}")
         return True
     else:
         print("💥 文章发布失败")
         return False
+
 
 if __name__ == "__main__":
     success = main()
