@@ -181,43 +181,12 @@ except ImportError:
         ]
     }
 
-# 配置 - 修复环境变量获取
-def get_env_vars():
-    """获取环境变量，提供详细的错误信息"""
-    env_vars = {}
-    required_vars = ['ZHIPU_API_KEY', 'WORDPRESS_URL', 'WORDPRESS_USER', 'WORDPRESS_PASSWORD']
-    
-    for var in required_vars:
-        value = os.getenv(var)
-        if not value:
-            print(f"❌ 环境变量 {var} 未设置")
-        else:
-            # 打印部分值用于调试（隐藏敏感信息）
-            if 'PASSWORD' in var or 'KEY' in var:
-                print(f"✅ 环境变量 {var}: ****{'*' * (len(value) - 4)}" if len(value) > 8 else f"✅ 环境变量 {var}: ****")
-            else:
-                print(f"✅ 环境变量 {var}: {value[:50]}..." if len(value) > 50 else f"✅ 环境变量 {var}: {value}")
-        env_vars[var] = value
-    
-    # 可选环境变量
-    optional_vars = ['UNSPLASH_ACCESS_KEY']
-    for var in optional_vars:
-        value = os.getenv(var)
-        if value:
-            print(f"✅ 环境变量 {var}: ****{'*' * (len(value) - 4)}" if len(value) > 8 else f"✅ 环境变量 {var}: ****")
-        env_vars[var] = value
-    
-    return env_vars
-
-# 尝试获取环境变量
-ENV_VARS = get_env_vars()
-
-# 分配环境变量
-ZHIPU_API_KEY = ENV_VARS.get('ZHIPU_API_KEY')
-WORDPRESS_URL = ENV_VARS.get('WORDPRESS_URL')
-WORDPRESS_USER = ENV_VARS.get('WORDPRESS_USER')
-WORDPRESS_PASSWORD = ENV_VARS.get('WORDPRESS_PASSWORD')
-UNSPLASH_ACCESS_KEY = ENV_VARS.get('UNSPLASH_ACCESS_KEY')
+# 配置
+ZHIPU_API_KEY = os.getenv('ZHIPU_API_KEY')
+WORDPRESS_URL = os.getenv('WORDPRESS_URL')
+WORDPRESS_USER = os.getenv('WORDPRESS_USER')
+WORDPRESS_PASSWORD = os.getenv('WORDPRESS_PASSWORD')
+UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY')
 
 # 分类映射
 CATEGORY_MAP = {
@@ -734,6 +703,40 @@ def add_featured_image(post_id, media_id):
         print(f"❌ 设置特色图片异常: {e}")
         return False
 
+def clean_html_content(content):
+    """清理HTML内容，移除无效标签"""
+    # 清理常见的无效标签
+    invalid_tags = [
+        r'<pFig[^>]*>.*?</pFig>',
+        r'<quad[^>]*>.*?</quad>',
+        r'<pos_\d+[^>]*>',
+        r'<[^>]+>.*?</[^>]+>',
+    ]
+    
+    cleaned_content = content
+    
+    # 移除无效标签
+    for pattern in invalid_tags:
+        cleaned_content = re.sub(pattern, '', cleaned_content, flags=re.DOTALL)
+    
+    # 清理多余的空行
+    cleaned_content = re.sub(r'\n{3,}', '\n\n', cleaned_content)
+    
+    # 确保HTML格式正确
+    if '<p>' not in cleaned_content and '<h' not in cleaned_content:
+        # 如果没有HTML标签，添加段落标签
+        paragraphs = cleaned_content.strip().split('\n\n')
+        html_paragraphs = []
+        for para in paragraphs:
+            if para.strip():
+                html_paragraphs.append(f'<p>{para.strip()}</p>')
+        cleaned_content = '\n'.join(html_paragraphs)
+    
+    # 移除可能的script标签
+    cleaned_content = re.sub(r'<script[^>]*>.*?</script>', '', cleaned_content, flags=re.DOTALL)
+    
+    return cleaned_content
+
 def insert_images_into_content(content, images_data):
     """在文章内容中插入多张图片"""
     if not images_data:
@@ -823,7 +826,7 @@ def get_zhipu_ai_content(topic, category, angle):
     else:
         difficulty = "适合小学生阅读，语言亲切易懂但专业"
     
-    # 修改提示词：去除图片标记说明，强调紧凑格式
+    # 修复提示词：要求AI生成干净的HTML
     prompt = f"""
 请以专业教师的身份，为{student_type}写一篇关于'{topic}'的详细学习文章，重点角度是：{angle}。
 
@@ -832,7 +835,7 @@ def get_zhipu_ai_content(topic, category, angle):
 2. 科目重点：{subject}，角度重点：{angle}
 3. 字数：1200-1500字
 4. 内容结构要求：
-   - 开头：直接生动引入主题，说明学习重要性（不要有空行间隔）
+   - 开头：直接生动引入主题，说明学习重要性
    - 知识讲解：详细讲解核心知识点，包含2-3个具体例子
    - 方法指导：提供实用的学习方法和技巧
    - 实践应用：设计3-4个练习题或实践活动
@@ -842,9 +845,10 @@ def get_zhipu_ai_content(topic, category, angle):
 
 5. 包含丰富的实例和案例分析
 6. 语言生动有趣，适合{student_type}阅读但内容专业
-7. 使用HTML格式，包含适当的标题和段落
-8. 特别注意：文章开头不要有过多空行，标题和正文之间最多只能有1行空行
-9. 文章内容要紧凑，段落之间使用正常的间距
+7. 使用干净的HTML格式，只使用以下标签：<h2>, <h3>, <h4>, <p>, <ul>, <li>, <strong>, <em>
+8. 特别注意：不要使用任何特殊字符、图片标签、表格标签或其他复杂HTML标签
+9. 文章开头不要有过多空行，标题和正文之间最多只能有1行空行
+10. 文章内容要紧凑，段落之间使用正常的间距
 
 请直接开始文章写作，不要有任何前言或说明：
     """
@@ -854,7 +858,7 @@ def get_zhipu_ai_content(topic, category, angle):
         "messages": [
             {
                 "role": "system", 
-                "content": f"你是一个经验丰富的{grade}教师，擅长用适当的语言解释复杂概念，能够激发学生的学习兴趣，同时保持内容的专业性和深度。特别注意：文章开头要紧凑，不要有多余空行。"
+                "content": f"你是一个经验丰富的{grade}教师，擅长用适当的语言解释复杂概念，能够激发学生的学习兴趣，同时保持内容的专业性和深度。特别注意：只使用简单干净的HTML标签，不要添加任何特殊字符或复杂格式。"
             },
             {
                 "role": "user", 
@@ -872,13 +876,11 @@ def get_zhipu_ai_content(topic, category, angle):
             content = result['choices'][0]['message']['content'].strip()
             print(f"✅ AI生成内容长度: {len(content)}字符")
             
-            # 清理多余的空行：将连续3个或以上的换行符替换为2个
-            cleaned_content = re.sub(r'\n{3,}', '\n\n', content)
-            # 清理段落标签之间的多余空行
-            cleaned_content = re.sub(r'(</p>)\s*(\n\s*){3,}(<p>|</?h[1-6]>)', r'\1\n\n\3', cleaned_content)
+            # 清理HTML内容
+            cleaned_content = clean_html_content(content)
             
             if cleaned_content != content:
-                print(f"✅ 已清理多余空行，从{len(content)}字符减少到{len(cleaned_content)}字符")
+                print(f"✅ 已清理HTML，从{len(content)}字符减少到{len(cleaned_content)}字符")
             
             return cleaned_content
         else:
@@ -889,8 +891,8 @@ def get_zhipu_ai_content(topic, category, angle):
         print(f"❌ AI生成失败: {e}")
         return None
 
-def generate_complete_seo_data(title, content, tags, category):
-    """生成完整的SEO数据，包括所有必要的Yoast SEO字段"""
+def generate_seo_data(title, content, tags, category):
+    """生成Yoast SEO相关数据"""
     try:
         # 提取SEO标题
         site_name = "GoGewu格物智库"
@@ -942,120 +944,58 @@ def generate_complete_seo_data(title, content, tags, category):
         
         # 创建完整的SEO数据结构
         seo_data = {
-            # Yoast SEO核心字段
             "_yoast_wpseo_title": seo_title,
             "_yoast_wpseo_metadesc": seo_description,
             "_yoast_wpseo_focuskw": focus_keyword,
             "_yoast_wpseo_meta-robots-noindex": "0",
             "_yoast_wpseo_meta-robots-nofollow": "0",
-            
-            # Open Graph字段
+            "_yoast_wpseo_canonical": "",
             "_yoast_wpseo_opengraph-title": seo_title,
             "_yoast_wpseo_opengraph-description": seo_description,
             "_yoast_wpseo_opengraph-image": "",
-            
-            # Twitter字段
             "_yoast_wpseo_twitter-title": seo_title,
             "_yoast_wpseo_twitter-description": seo_description,
             "_yoast_wpseo_twitter-image": "",
-            
-            # 额外的重要字段
-            "_yoast_wpseo_canonical": "",
-            "_yoast_wpseo_meta-robots-adv": "",
-            
-            # Schema结构化数据
-            "_yoast_wpseo_schema_article_type": "Article",
-            "_yoast_wpseo_schema_page_type": "WebPage",
         }
         
-        print(f"🔍 生成完整的SEO数据:")
-        print(f"  - Meta描述: {seo_description}")
+        print(f"🔍 生成SEO数据:")
         print(f"  - SEO标题: {seo_title}")
+        print(f"  - SEO描述: {seo_description[:60]}...")
         print(f"  - 焦点关键词: {focus_keyword}")
-        print(f"  - 描述长度: {len(seo_description)}字符")
         
         return seo_data
         
     except Exception as e:
         print(f"❌ 生成SEO数据失败: {e}")
-        # 返回基础SEO数据
-        return {
-            "_yoast_wpseo_title": f"{title} - {site_name}",
-            "_yoast_wpseo_metadesc": f"本文详细讲解{title}的概念、应用和解题方法，帮助{category[:3]}学生掌握相关知识。",
-            "_yoast_wpseo_focuskw": title[:4] if len(title) > 4 else title,
-        }
+        return None
 
-
-def update_yoast_seo_with_complete_fields(post_id, title, content, tags, category):
-    """使用完整的Yoast SEO字段更新文章"""
+def update_yoast_seo(post_id, seo_data):
+    """更新文章的Yoast SEO信息"""
     try:
-        api_url = WORDPRESS_URL.rstrip('/') + f'/wp-json/wp/v2/posts/{post_id}'
+        update_url = WORDPRESS_URL.rstrip('/') + f'/wp-json/wp/v2/posts/{post_id}'
         auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
         
-        # 生成完整的SEO数据
-        seo_data = generate_complete_seo_data(title, content, tags, category)
-        
         if not seo_data:
-            print(f"❌ 无法生成SEO数据")
+            print("⚠️  没有SEO数据需要更新")
             return False
         
-        # 检查当前文章的SEO设置
-        print("🔍 检查当前SEO设置...")
-        response = requests.get(api_url, auth=auth, timeout=10)
-        
-        if response.status_code == 200:
-            current_post = response.json()
-            current_meta = current_post.get('meta', {})
-            
-            # 检查是否缺少关键的meta description
-            if '_yoast_wpseo_metadesc' not in current_meta or not current_meta['_yoast_wpseo_metadesc']:
-                print("⚠️  检测到缺少Meta描述，正在修复...")
-            else:
-                print(f"✅ 当前有Meta描述: {current_meta.get('_yoast_wpseo_metadesc', '')[:50]}...")
-        
-        # 更新SEO数据
+        # WordPress REST API中，Yoast SEO数据通常通过meta字段设置
         update_data = {
             'meta': seo_data
         }
         
-        update_response = requests.post(api_url, json=update_data, auth=auth, timeout=10)
+        response = requests.post(update_url, json=update_data, auth=auth, timeout=10)
         
-        if update_response.status_code == 200:
-            print("✅ Yoast SEO信息已完整更新！")
-            print(f"   已设置的关键SEO字段:")
-            print(f"   1. _yoast_wpseo_title: {seo_data.get('_yoast_wpseo_title')}")
-            print(f"   2. _yoast_wpseo_metadesc: {seo_data.get('_yoast_wpseo_metadesc')[:60]}...")
-            print(f"   3. _yoast_wpseo_focuskw: {seo_data.get('_yoast_wpseo_focuskw')}")
+        if response.status_code == 200:
+            print("✅ Yoast SEO信息更新成功")
             return True
         else:
-            print(f"❌ Yoast SEO信息更新失败: {update_response.status_code}")
+            print(f"⚠️  Yoast SEO信息更新失败: {response.status_code}")
             return False
             
     except Exception as e:
         print(f"❌ 更新Yoast SEO异常: {e}")
         return False
-
-
-def ensure_seo_fields_in_post_creation(title, content, category, slug):
-    """在文章创建时确保包含所有必要的SEO字段"""
-    # 生成智能标签名称
-    tag_names = generate_smart_tags(category, content, title)
-    
-    # 生成完整的SEO数据
-    seo_data = generate_complete_seo_data(title, content, tag_names, category)
-    
-    # 在发布数据中包含SEO数据
-    post_data = {
-        'title': title,
-        'content': content,
-        'status': 'draft',
-        'slug': slug,
-    }
-    
-    if seo_data:
-        post_data['meta'] = seo_data
-    
-    return post_data, seo_data
 
 def process_images_for_article(category, topic, content, post_id):
     """为文章处理多张图片"""
@@ -1211,7 +1151,8 @@ def post_to_wordpress_with_tags(title, content, category, slug):
             
             return True, post_id, tag_names
         else:
-            print(f"❌ 发布失败: {response.text}")
+            print(f"❌ 发布失败: {response.status_code}")
+            print(f"错误详情: {response.text[:200]}")
             return False, None, None
             
     except Exception as e:
@@ -1255,29 +1196,13 @@ def main():
     print(f"📅 当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     # 检查必要的环境变量
-    required_vars = [ZHIPU_API_KEY, WORDPRESS_URL, WORDPRESS_USER, WORDPRESS_PASSWORD]
-    
-    # 验证环境变量
-    if not all(required_vars):
-        missing_vars = []
-        if not ZHIPU_API_KEY:
-            missing_vars.append("ZHIPU_API_KEY")
-        if not WORDPRESS_URL:
-            missing_vars.append("WORDPRESS_URL")
-        if not WORDPRESS_USER:
-            missing_vars.append("WORDPRESS_USER")
-        if not WORDPRESS_PASSWORD:
-            missing_vars.append("WORDPRESS_PASSWORD")
-        
-        print(f"❌ 错误：缺少必要的环境变量配置: {', '.join(missing_vars)}")
-        print("\n请确保在GitHub Actions中设置了以下secrets:")
-        print("1. ZHIPU_API_KEY: 智谱AI的API密钥")
+    if not all([ZHIPU_API_KEY, WORDPRESS_URL, WORDPRESS_USER, WORDPRESS_PASSWORD]):
+        print("❌ 错误：缺少必要的环境变量配置")
+        print("请设置以下环境变量：")
+        print("1. ZHIPU_API_KEY: 智谱AI API密钥")
         print("2. WORDPRESS_URL: WordPress网站地址")
         print("3. WORDPRESS_USER: WordPress用户名")
         print("4. WORDPRESS_PASSWORD: WordPress应用密码")
-        print("\n如果需要使用Unsplash图片，还需要设置:")
-        print("5. UNSPLASH_ACCESS_KEY: Unsplash API访问密钥")
-        
         return False
     
     # 初始化jieba分词
