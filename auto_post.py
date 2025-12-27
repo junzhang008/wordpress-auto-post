@@ -704,36 +704,31 @@ def add_featured_image(post_id, media_id):
         return False
 
 def clean_html_content(content):
-    """清理HTML内容，移除无效标签"""
-    # 清理常见的无效标签
-    invalid_tags = [
-        r'<pFig[^>]*>.*?</pFig>',
-        r'<quad[^>]*>.*?</quad>',
-        r'<pos_\d+[^>]*>',
-        r'<[^>]+>.*?</[^>]+>',
-    ]
+    """清理HTML内容，移除无效标签 - 修复版本"""
+    if not content:
+        return content
     
     cleaned_content = content
     
-    # 移除无效标签
-    for pattern in invalid_tags:
-        cleaned_content = re.sub(pattern, '', cleaned_content, flags=re.DOTALL)
+    # 只清理特定的无效标签，而不是所有标签
+    invalid_patterns = [
+        r'<pFig[^>]*>',
+        r'</pFig>',
+        r'<quad[^>]*>',
+        r'</quad>',
+        r'<pos_\d+[^>]*>',
+    ]
+    
+    for pattern in invalid_patterns:
+        cleaned_content = re.sub(pattern, '', cleaned_content)
     
     # 清理多余的空行
     cleaned_content = re.sub(r'\n{3,}', '\n\n', cleaned_content)
     
-    # 确保HTML格式正确
-    if '<p>' not in cleaned_content and '<h' not in cleaned_content:
-        # 如果没有HTML标签，添加段落标签
-        paragraphs = cleaned_content.strip().split('\n\n')
-        html_paragraphs = []
-        for para in paragraphs:
-            if para.strip():
-                html_paragraphs.append(f'<p>{para.strip()}</p>')
-        cleaned_content = '\n'.join(html_paragraphs)
-    
-    # 移除可能的script标签
-    cleaned_content = re.sub(r'<script[^>]*>.*?</script>', '', cleaned_content, flags=re.DOTALL)
+    # 确保内容不为空
+    if cleaned_content.strip() == '':
+        print("⚠️  清理后内容为空，返回原始内容")
+        return content
     
     return cleaned_content
 
@@ -780,7 +775,7 @@ def insert_images_into_content(content, images_data):
     return content_with_images
 
 def get_zhipu_ai_content(topic, category, angle):
-    """使用智谱AI生成丰富内容的文章 - 修复内容截断问题"""
+    """使用智谱AI生成丰富内容的文章 - 修复版本"""
     if not ZHIPU_API_KEY:
         print("❌ 智谱API密钥未设置")
         return None
@@ -826,68 +821,27 @@ def get_zhipu_ai_content(topic, category, angle):
     else:
         difficulty = "适合小学生阅读，语言亲切易懂但专业"
     
-    # 修复提示词：要求AI生成完整的长文章
+    # 修复提示词
     prompt = f"""
 请以专业教师的身份，为{student_type}写一篇关于'{topic}'的详细学习文章，重点角度是：{angle}。
-
-**重要：请生成一篇完整的、结构完整的文章，不要中途停止！**
 
 **写作要求：**
 1. 面向{student_type}，{difficulty}
 2. 科目重点：{subject}，角度重点：{angle}
-3. **字数：至少2000字，请确保内容完整**
-4. **内容结构要求（必须包含以下所有部分）：**
+3. 字数：至少2000字
+4. 内容结构必须包含：
+   - 引言：生动开头，说明学习重要性
+   - 核心知识：详细讲解3-5个核心知识点，每个有具体例子
+   - 学习方法：提供3-4种实用的学习方法
+   - 实践练习：设计5-6个练习题，包含详细解答
+   - 常见问题：列出5-6个常见问题及解决方法
+   - 拓展学习：推荐学习资源和进阶知识
+   - 总结：回顾重点，给出学习建议
 
-   **一、引言部分**
-   - 生动的开头，引入主题
-   - 说明学习这个话题的重要性和实际应用
-   - 激发学生的兴趣
+5. 使用干净的HTML格式，只使用：<h2>, <h3>, <p>, <ul>, <li>, <strong>, <em>
+6. 确保文章完整，不要中途停止
 
-   **二、核心知识讲解（详细讲解）**
-   - 基本概念定义
-   - 3-5个核心知识点，每个知识点都要有：
-     * 详细的解释
-     * 至少2个具体例子
-     * 与日常生活相关的应用
-   - 如果适用，包含图表说明
-
-   **三、学习方法指导**
-   - 提供3-4种实用的学习方法
-   - 每种方法都要有具体的步骤说明
-   - 学习技巧和记忆方法
-   - 如何避免常见错误
-
-   **四、实践应用与练习**
-   - 设计5-6个练习题，从易到难
-   - 每个练习题都要有：
-     * 题目
-     * 详细的解题步骤
-     * 最终答案
-   - 实践活动建议
-
-   **五、常见问题与解答**
-   - 列出学生常见的5-6个问题
-   - 每个问题都要有详细的解答
-   - 提供避免这些问题的方法
-
-   **六、拓展学习**
-   - 相关的进阶知识
-   - 推荐的学习资源
-   - 如何将这个知识点与其他知识点联系起来
-
-   **七、总结与建议**
-   - 回顾重点内容
-   - 给出学习建议
-   - 鼓励学生继续深入学习
-
-5. 包含丰富的实例和案例分析
-6. 语言生动有趣，适合{student_type}阅读但内容专业
-7. 使用干净的HTML格式，只使用以下标签：<h2>, <h3>, <h4>, <p>, <ul>, <li>, <strong>, <em>
-8. 特别注意：不要使用任何特殊字符、图片标签、表格标签或其他复杂HTML标签
-9. 文章开头不要有过多空行，标题和正文之间最多只能有1行空行
-10. **确保文章完整，不要中途结束**
-
-**请生成完整的、结构完整的文章，不要只写一部分就停止。** 请直接开始文章写作，不要有任何前言或说明：
+请直接开始文章写作：
     """
     
     data = {
@@ -895,50 +849,32 @@ def get_zhipu_ai_content(topic, category, angle):
         "messages": [
             {
                 "role": "system", 
-                "content": f"你是一个经验丰富的{grade}教师，擅长用适当的语言解释复杂概念，能够激发学生的学习兴趣，同时保持内容的专业性和深度。特别注意：1. 必须生成完整的长文章，至少2000字；2. 必须包含所有要求的部分；3. 只使用简单干净的HTML标签；4. 不要添加任何特殊字符或复杂格式。"
+                "content": f"你是一个经验丰富的{grade}教师，擅长用适当的语言解释复杂概念，能够激发学生的学习兴趣。特别注意：必须生成完整的长文章，至少2000字，包含所有要求的部分。"
             },
             {
                 "role": "user", 
                 "content": prompt
             }
         ],
-        "temperature": 0.7,  # 降低温度以获得更稳定的输出
-        "max_tokens": 4000,  # 增加token数量
-        "stream": False
+        "temperature": 0.7,
+        "max_tokens": 4000,
     }
     
     try:
-        print(f"🤖 正在调用AI生成内容，请求参数: max_tokens={data['max_tokens']}")
-        response = requests.post(url, headers=headers, json=data, timeout=120)  # 增加超时时间
+        print(f"🤖 正在调用AI生成内容...")
+        response = requests.post(url, headers=headers, json=data, timeout=120)
         
         if response.status_code == 200:
             result = response.json()
             content = result['choices'][0]['message']['content'].strip()
             
-            # 检查内容是否完整
             content_length = len(content)
             print(f"✅ AI生成内容长度: {content_length}字符")
             
             if content_length < 1000:
                 print(f"⚠️  警告：生成的内容可能不完整，只有{content_length}字符")
             
-            # 检查是否包含所有必要的部分
-            required_sections = ["引言", "核心知识", "学习方法", "实践应用", "常见问题", "拓展学习", "总结"]
-            missing_sections = []
-            
-            for section in required_sections:
-                if section in content:
-                    pass
-                elif "一、" in content or "二、" in content or "1." in content:
-                    # 如果有其他结构，认为是完整的
-                    pass
-                else:
-                    missing_sections.append(section)
-            
-            if missing_sections:
-                print(f"⚠️  警告：可能缺少以下部分: {', '.join(missing_sections)}")
-            
-            # 清理HTML内容
+            # 轻度清理HTML
             cleaned_content = clean_html_content(content)
             
             if cleaned_content != content:
@@ -953,13 +889,31 @@ def get_zhipu_ai_content(topic, category, angle):
         print(f"❌ AI生成失败: {e}")
         return None
 
+def retry_ai_generation(topic, category, angle, max_retries=2):
+    """重试AI生成，直到获得足够长度的内容"""
+    for attempt in range(max_retries + 1):
+        print(f"🔄 第{attempt+1}次尝试生成内容...")
+        
+        content = get_zhipu_ai_content(topic, category, angle)
+        
+        if content and len(content) > 1500:
+            print(f"✅ 第{attempt+1}次尝试成功，获得{len(content)}字符的内容")
+            return content
+        elif content and len(content) > 0:
+            print(f"⚠️  第{attempt+1}次尝试内容长度{len(content)}字符，尝试重试...")
+            if attempt < max_retries:
+                time.sleep(2)
+        else:
+            print(f"❌ 第{attempt+1}次尝试失败")
+            if attempt < max_retries:
+                time.sleep(2)
+    
+    return content
+
 def generate_complete_seo_data(title, content, tags, category):
     """生成完整的SEO数据"""
     try:
-        # 设置正确的网站名称
         site_name = "格物智库"
-        
-        # SEO标题
         seo_title = f"{title} - {site_name}"
         
         # 从内容中提取纯文本
@@ -968,7 +922,6 @@ def generate_complete_seo_data(title, content, tags, category):
         
         # 生成SEO描述
         if len(plain_text) > 155:
-            # 寻找句子结束点
             if '.' in plain_text[:155]:
                 end_pos = plain_text[:155].rfind('.') + 1
                 seo_description = plain_text[:end_pos].strip()
@@ -977,7 +930,6 @@ def generate_complete_seo_data(title, content, tags, category):
         else:
             seo_description = plain_text
         
-        # 确保描述不为空
         if not seo_description or len(seo_description) < 20:
             seo_description = f"本文详细讲解{title}的概念、应用和解题方法，帮助{category[:3]}学生掌握相关知识。"
         
@@ -989,26 +941,17 @@ def generate_complete_seo_data(title, content, tags, category):
         
         # 创建完整的Yoast SEO数据结构
         seo_data = {
-            # 核心SEO字段
             "_yoast_wpseo_title": seo_title,
             "_yoast_wpseo_metadesc": seo_description,
             "_yoast_wpseo_focuskw": focus_keyword,
             "_yoast_wpseo_meta-robots-noindex": "0",
             "_yoast_wpseo_meta-robots-nofollow": "0",
-            
-            # Open Graph
             "_yoast_wpseo_opengraph-title": seo_title,
             "_yoast_wpseo_opengraph-description": seo_description,
-            
-            # Twitter
             "_yoast_wpseo_twitter-title": seo_title,
             "_yoast_wpseo_twitter-description": seo_description,
-            
-            # 其他必要字段
             "_yoast_wpseo_canonical": "",
             "_yoast_wpseo_meta-robots-adv": "",
-            
-            # Schema数据
             "_yoast_wpseo_schema_article_type": "Article",
             "_yoast_wpseo_schema_page_type": "WebPage",
         }
@@ -1017,41 +960,12 @@ def generate_complete_seo_data(title, content, tags, category):
         print(f"  - SEO标题: {seo_title}")
         print(f"  - SEO描述: {seo_description[:60]}...")
         print(f"  - 焦点关键词: {focus_keyword}")
-        print(f"  - 网站名称: {site_name}")
         
         return seo_data
         
     except Exception as e:
         print(f"❌ 生成SEO数据失败: {e}")
         return None
-
-def update_yoast_seo(post_id, seo_data):
-    """更新文章的Yoast SEO信息"""
-    try:
-        update_url = WORDPRESS_URL.rstrip('/') + f'/wp-json/wp/v2/posts/{post_id}'
-        auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
-        
-        if not seo_data:
-            print("⚠️  没有SEO数据需要更新")
-            return False
-        
-        # WordPress REST API中，Yoast SEO数据通过meta字段设置
-        update_data = {
-            'meta': seo_data
-        }
-        
-        response = requests.post(update_url, json=update_data, auth=auth, timeout=10)
-        
-        if response.status_code == 200:
-            print("✅ Yoast SEO信息更新成功")
-            return True
-        else:
-            print(f"⚠️  Yoast SEO信息更新失败: {response.status_code}")
-            return False
-            
-    except Exception as e:
-        print(f"❌ 更新Yoast SEO异常: {e}")
-        return False
 
 def process_images_for_article(category, topic, content, post_id):
     """为文章处理多张图片"""
@@ -1076,12 +990,11 @@ def process_images_for_article(category, topic, content, post_id):
                 alt_text = f"{topic} - {image_type}"
                 caption = f"{image_type}: {topic}"
                 
-                # 获取上传结果，包含media_id和media_url
                 upload_result = upload_image_to_wordpress(image_url, f"{topic}_{image_type}", alt_text)
                 
                 if upload_result:
                     images_data.append({
-                        'media_url': upload_result['media_url'],  # 使用WordPress媒体库的URL
+                        'media_url': upload_result['media_url'],
                         'alt_text': alt_text,
                         'caption': caption,
                         'media_id': upload_result['media_id'],
@@ -1093,7 +1006,6 @@ def process_images_for_article(category, topic, content, post_id):
                 if i == 0 and upload_result and 'media_id' in upload_result:
                     add_featured_image(post_id, upload_result['media_id'])
             
-            # 添加延迟避免请求过快
             time.sleep(1)
         
         # 在内容中插入所有图片
@@ -1112,6 +1024,10 @@ def post_to_wordpress_with_complete_seo(title, content, category, slug):
     """发布到WordPress，包含完整的SEO信息"""
     try:
         api_url = WORDPRESS_URL.rstrip('/') + '/wp-json/wp/v2/posts'
+        
+        # 检查内容长度
+        if len(content) < 800:
+            print(f"⚠️  警告：文章内容过短，只有{len(content)}字符")
         
         # 生成智能标签名称
         tag_names = generate_smart_tags(category, content, title)
@@ -1149,7 +1065,7 @@ def post_to_wordpress_with_complete_seo(title, content, category, slug):
         print(f"  - 分类: {category}(ID:{category_id})")
         print(f"  - 别名: {slug}")
         print(f"  - 标签数量: {len(tag_ids)}")
-        print(f"  - SEO标题: {seo_data.get('_yoast_wpseo_title') if seo_data else '无'}")
+        print(f"  - 文章长度: {len(content)}字符")
         
         # 发布文章
         response = requests.post(api_url, json=post_data, auth=auth, timeout=30)
@@ -1229,7 +1145,6 @@ def select_topic_and_angle():
     if subject in ARTICLE_ANGLES:
         angle = random.choice(ARTICLE_ANGLES[subject])
     else:
-        # 如果学科不在角度库中，使用通用角度
         angle_list = ["学习方法指导", "知识深度解析", "实践应用案例", "考试重点解析"]
         angle = random.choice(angle_list)
     
@@ -1257,9 +1172,9 @@ def main():
     slug = generate_random_slug(random.randint(6, 10))
     print(f"🔗 文章别名: {slug}")
     
-    # 获取AI内容
+    # 获取AI内容（带重试机制）
     print("\n🤖 正在调用AI生成内容...")
-    content = get_zhipu_ai_content(topic, category, angle)
+    content = retry_ai_generation(topic, category, angle, max_retries=2)
     
     if not content:
         print("❌ 内容生成失败")
