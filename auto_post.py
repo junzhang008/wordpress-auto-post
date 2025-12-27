@@ -17,7 +17,7 @@ CATEGORY_MAP = {
     "大学数学": 790, "大学英语": 789, "大学专业课": 792
 }
 
-# --- 2. 增强主题库 (您可以继续添加) ---
+# --- 2. 主题库 ---
 TOPICS_BY_CATEGORY = {
     "大学数学": ["高等数学：泰勒公式展开技巧", "线性代数：矩阵特征值求解", "多重积分计算方法"],
     "初中物理": ["牛顿第二定律综合应用", "串并联电路电压规律", "浮力计算公式详解"],
@@ -33,55 +33,59 @@ WORDPRESS_PASSWORD = os.getenv('WORDPRESS_PASSWORD')
 # --- 4. 核心功能函数 ---
 
 def get_or_create_tag_id(tag_name):
-    """【解决后台无标签】将文字标签转为 WP 识别的 ID"""
+    """【解决后台无标签】将文字标签转为 WP 识别的 ID 数字"""
     auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
     try:
         # 搜索现有标签
-        res = requests.get(f"{WORDPRESS_URL}/wp-json/wp/v2/tags?search={tag_name}", auth=auth, timeout=10).json()
+        search_res = requests.get(f"{WORDPRESS_URL}/wp-json/wp/v2/tags?search={tag_name}", auth=auth, timeout=10)
+        res = search_res.json()
         if res and isinstance(res, list) and len(res) > 0:
             for t in res:
                 if t['name'] == tag_name: return t['id']
         # 创建新标签
-        new_tag = requests.post(f"{WORDPRESS_URL}/wp-json/wp/v2/tags", json={'name': tag_name}, auth=auth).json()
+        new_tag_res = requests.post(f"{WORDPRESS_URL}/wp-json/wp/v2/tags", json={'name': tag_name}, auth=auth)
+        new_tag = new_tag_res.json()
         return new_tag.get('id')
     except: return None
 
 def upload_diverse_media(category, topic):
-    """【解决图片单一】根据科目匹配图库关键词，并上传二进制流"""
+    """【解决图片单一且无法加载】根据科目匹配图库关键词，并处理二进制流"""
     auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
     
-    # 智能关键词库
-    subject_keywords = {
-        "数学": "math,geometry,calculus",
-        "语文": "chinese,calligraphy,library,ancient",
-        "英语": "english,alphabet,abroad,global",
-        "物理": "physics,laboratory,electricity,atom",
-        "化学": "chemistry,science,molecule,test-tube",
-        "大学": "university,campus,professional,research"
+    # 建立学科与图片的关键词映射
+    mapping = {
+        "数学": ["geometry", "math", "calculation", "formula"],
+        "物理": ["physics", "laboratory", "electricity", "experiment"],
+        "化学": ["chemistry", "test tube", "molecule", "reaction"],
+        "语文": ["library", "ancient book", "writing", "calligraphy"],
+        "英语": ["english", "alphabet", "global", "vocabulary"]
     }
     
     # 根据分类动态选择搜索词
-    kw = "education"
-    for s_key, s_val in subject_keywords.items():
-        if s_key in category:
-            kw = s_val
+    kws = ["education", "classroom", "student"]
+    for key, val in mapping.items():
+        if key in category:
+            kws.extend(val)
             break
+    keyword = random.choice(kws)
 
     try:
-        # 获取图片并处理重定向，确保不是空白白块
-        img_url = f"https://source.unsplash.com/800x450/?{kw}"
-        response = requests.get(img_url, timeout=20, allow_redirects=True)
-        image_data = io.BytesIO(response.content)
+        # 确保处理重定向，获取真实的图片流以防止白块
+        img_url = f"https://source.unsplash.com/800x450/?{keyword}"
+        img_res = requests.get(img_url, timeout=20, allow_redirects=True)
+        if img_res.status_code != 200: return None, None
         
+        image_data = io.BytesIO(img_res.content)
         filename = f"edu_{''.join(random.choices(string.ascii_lowercase, k=8))}.jpg"
-        files = {'file': (filename, image_data, 'image/jpeg')}
         
-        res = requests.post(
+        files = {'file': (filename, image_data, 'image/jpeg')}
+        upload_res = requests.post(
             f"{WORDPRESS_URL}/wp-json/wp/v2/media",
             files=files, auth=auth,
             headers={'Content-Disposition': f'attachment; filename={filename}'},
             timeout=30
-        ).json()
+        )
+        res = upload_res.json()
         return res.get('id'), res.get('source_url')
     except: return None, None
 
@@ -89,17 +93,17 @@ def post_to_wordpress(title, content, category):
     auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
     cat_id = CATEGORY_MAP.get(category, 1)
     
-    # 1. 自动生成并转换标签 (解决无标签问题)
-    raw_tag_names = [category[:2], category[-2:], "学习资源"]
+    # 1. 自动转换标签文字为 ID 数字
+    raw_tag_names = [category[:2], category[-2:], "学习资料"]
     tag_ids = [get_or_create_tag_id(name) for name in raw_tag_names if get_or_create_tag_id(name)]
 
-    # 2. 获取多样化图片并上传 (解决图片单一问题)
+    # 2. 获取并上传多样化图片
     media_id, img_url = upload_diverse_media(category, title)
     
-    # 3. 样式修正：缩短标题与图片间距
+    # 3. 样式修正：缩短标题与图片间距并修复可能的重叠
     style_fix = '<style>.entry-content { margin-top: -35px !important; } .entry-header { margin-bottom: 5px !important; }</style>'
     
-    # 4. 注入正文图片、内容与下载框
+    # 4. 注入正文首图及下载框
     img_html = f'<p style="text-align:center;"><img src="{img_url}" alt="{title}" style="border-radius:10px; width:100%;" /></p>' if img_url else ""
     
     download_html = f"""
@@ -118,17 +122,18 @@ def post_to_wordpress(title, content, category):
         'content': final_content,
         'status': 'publish',
         'categories': [cat_id],
-        'tags': tag_ids, # 发送 ID 列表
+        'tags': tag_ids, # 发送 ID 列表而非文字
         'featured_media': media_id if media_id else 0,
         'slug': ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
     }
     
     res = requests.post(f"{WORDPRESS_URL}/wp-json/wp/v2/posts", json=post_data, auth=auth, timeout=30)
     if res.status_code == 201:
-        print(f"✅ 发布成功: {title} (已包含标签和多样化图片)")
+        print(f"✅ 发布成功: {title}")
     else:
         print(f"❌ 失败: {res.text}")
 
+# --- 5. 运行 ---
 def main():
     category = random.choice(list(TOPICS_BY_CATEGORY.keys()))
     topic = random.choice(TOPICS_BY_CATEGORY[category])
