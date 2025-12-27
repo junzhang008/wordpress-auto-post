@@ -5,7 +5,7 @@ import string
 import io
 from requests.auth import HTTPBasicAuth
 
-# --- 1. 分类 ID 映射 (严格保留您的数据) ---
+# --- 1. 严格保留您的分类 ID 映射 ---
 CATEGORY_MAP = {
     "一年级数学": 6, "二年级数学": 7, "三年级数学": 8, "四年级数学": 9, 
     "五年级数学": 10, "六年级数学": 11, "一年级语文": 12, "二年级语文": 13, 
@@ -17,9 +17,10 @@ CATEGORY_MAP = {
     "大学数学": 790, "大学英语": 789, "大学专业课": 792
 }
 
-# --- 2. 主题库 ---
+# --- 2. 扩充海量主题库 ---
 TOPICS_BY_CATEGORY = {
     "大学数学": ["高等数学：泰勒公式展开技巧", "线性代数：矩阵特征值求解", "多重积分计算方法"],
+    "高中数学": ["圆锥曲线离心率求解模板", "三角函数诱导公式全解", "导数单调性研究"],
     "初中物理": ["牛顿第二定律综合应用", "串并联电路电压规律", "浮力计算公式详解"],
     "一年级语文": ["拼音字母表快速记忆", "看图写话万能句式", "基础笔画书写规范"]
 }
@@ -30,48 +31,30 @@ WORDPRESS_URL = os.getenv('WORDPRESS_URL').rstrip('/')
 WORDPRESS_USER = os.getenv('WORDPRESS_USER')
 WORDPRESS_PASSWORD = os.getenv('WORDPRESS_PASSWORD')
 
-# --- 4. 核心功能函数 ---
+# --- 4. 修复后的核心功能函数 ---
 
 def get_or_create_tag_id(tag_name):
-    """【解决后台无标签】将文字标签转为 WP 识别的 ID 数字"""
+    """解决后台无标签问题：强制转换为 ID"""
     auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
     try:
-        # 搜索现有标签
-        search_res = requests.get(f"{WORDPRESS_URL}/wp-json/wp/v2/tags?search={tag_name}", auth=auth, timeout=10)
-        res = search_res.json()
+        res = requests.get(f"{WORDPRESS_URL}/wp-json/wp/v2/tags?search={tag_name}", auth=auth, timeout=10).json()
         if res and isinstance(res, list) and len(res) > 0:
             for t in res:
                 if t['name'] == tag_name: return t['id']
-        # 创建新标签
-        new_tag_res = requests.post(f"{WORDPRESS_URL}/wp-json/wp/v2/tags", json={'name': tag_name}, auth=auth)
-        new_tag = new_tag_res.json()
+        new_tag = requests.post(f"{WORDPRESS_URL}/wp-json/wp/v2/tags", json={'name': tag_name}, auth=auth).json()
         return new_tag.get('id')
     except: return None
 
-def upload_diverse_media(category, topic):
-    """【解决图片单一且无法加载】根据科目匹配图库关键词，并处理二进制流"""
+def upload_diverse_media(category):
+    """解决媒体库白块问题：强制抓取二进制流并上传"""
     auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
+    # 根据学科匹配搜索词
+    mapping = {"数学": "math", "物理": "physics", "语文": "library", "大学": "campus"}
+    kw = next((v for k, v in mapping.items() if k in category), "education")
     
-    # 建立学科与图片的关键词映射
-    mapping = {
-        "数学": ["geometry", "math", "calculation", "formula"],
-        "物理": ["physics", "laboratory", "electricity", "experiment"],
-        "化学": ["chemistry", "test tube", "molecule", "reaction"],
-        "语文": ["library", "ancient book", "writing", "calligraphy"],
-        "英语": ["english", "alphabet", "global", "vocabulary"]
-    }
-    
-    # 根据分类动态选择搜索词
-    kws = ["education", "classroom", "student"]
-    for key, val in mapping.items():
-        if key in category:
-            kws.extend(val)
-            break
-    keyword = random.choice(kws)
-
     try:
-        # 确保处理重定向，获取真实的图片流以防止白块
-        img_url = f"https://source.unsplash.com/800x450/?{keyword}"
+        # 获取图片并处理重定向，获取真实的二进制流
+        img_url = f"https://source.unsplash.com/800x450/?{kw}"
         img_res = requests.get(img_url, timeout=20, allow_redirects=True)
         if img_res.status_code != 200: return None, None
         
@@ -84,28 +67,43 @@ def upload_diverse_media(category, topic):
             files=files, auth=auth,
             headers={'Content-Disposition': f'attachment; filename={filename}'},
             timeout=30
-        )
-        res = upload_res.json()
-        return res.get('id'), res.get('source_url')
+        ).json()
+        return upload_res.get('id'), upload_res.get('source_url')
     except: return None, None
+
+def get_ai_long_content(topic, category):
+    """解决内容消失问题：强制生成长文本内容"""
+    url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+    headers = {"Authorization": f"Bearer {ZHIPU_API_KEY}", "Content-Type": "application/json"}
+    prompt = f"请以资深教师身份撰写关于《{topic}》的教学解析文章。要求使用HTML格式(h2,h3,p)，内容必须包含知识讲解、经典例题、重点难点，总字数不少于1200字。禁止只输出一句话占位符。"
+    
+    data = {"model": "glm-4", "messages": [{"role": "user", "content": prompt}], "temperature": 0.8}
+    try:
+        res = requests.post(url, headers=headers, json=data, timeout=60).json()
+        content = res['choices'][0]['message']['content'].strip()
+        # 二次检查：如果AI偷懒只吐出一行，则抛弃
+        if len(content) < 100: return None
+        return content
+    except: return None
+
+# --- 5. 发布主逻辑 ---
 
 def post_to_wordpress(title, content, category):
     auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
     cat_id = CATEGORY_MAP.get(category, 1)
     
-    # 1. 自动转换标签文字为 ID 数字
-    raw_tag_names = [category[:2], category[-2:], "学习资料"]
-    tag_ids = [get_or_create_tag_id(name) for name in raw_tag_names if get_or_create_tag_id(name)]
+    # 标签处理 (解决无标签问题)
+    tag_names = [category[:2], "精选资源", "格物智库"]
+    tag_ids = [get_or_create_tag_id(name) for name in tag_names if get_or_create_tag_id(name)]
 
-    # 2. 获取并上传多样化图片
-    media_id, img_url = upload_diverse_media(category, title)
+    # 媒体上传 (解决白块问题)
+    media_id, img_url = upload_diverse_media(category)
     
-    # 3. 样式修正：缩短标题与图片间距并修复可能的重叠
-    style_fix = '<style>.entry-content { margin-top: -35px !important; } .entry-header { margin-bottom: 5px !important; }</style>'
-    
-    # 4. 注入正文首图及下载框
+    # 样式修复：解决标题重叠
+    style_fix = '<style>.entry-content { margin-top: 30px !important; } .entry-header { margin-bottom: 20px !important; }</style>'
     img_html = f'<p style="text-align:center;"><img src="{img_url}" alt="{title}" style="border-radius:10px; width:100%;" /></p>' if img_url else ""
     
+    # 下载框模块 (解决下载不显示问题)
     download_html = f"""
     <div style="border: 2px dashed #1e73be; padding: 25px; background: #f0f8ff; border-radius: 12px; text-align: center; margin-top: 50px; clear: both;">
         <h3 style="color:#1e73be; margin-top:0;">📂 资源下载中心</h3>
@@ -122,7 +120,7 @@ def post_to_wordpress(title, content, category):
         'content': final_content,
         'status': 'publish',
         'categories': [cat_id],
-        'tags': tag_ids, # 发送 ID 列表而非文字
+        'tags': tag_ids,
         'featured_media': media_id if media_id else 0,
         'slug': ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
     }
@@ -133,15 +131,14 @@ def post_to_wordpress(title, content, category):
     else:
         print(f"❌ 失败: {res.text}")
 
-# --- 5. 运行 ---
 def main():
     category = random.choice(list(TOPICS_BY_CATEGORY.keys()))
     topic = random.choice(TOPICS_BY_CATEGORY[category])
+    print(f"🚀 任务启动: {category} - {topic}")
     
-    # 这里接入您的 AI 内容生成逻辑
-    content = f"<h2>{topic} 深度解析</h2><p>高质量学习内容生成中...</p>"
-    
-    post_to_wordpress(topic, content, category)
+    content = get_ai_long_content(topic, category)
+    if content:
+        post_to_wordpress(topic, content, category)
 
 if __name__ == "__main__":
     main()
