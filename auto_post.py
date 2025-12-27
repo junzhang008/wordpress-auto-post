@@ -21,7 +21,7 @@ except ImportError:
         "一年级数学": [
             "10以内加减法练习", "认识数字1-100", "简单图形识别", "数字的大小比较", 
             "认识钟表时间", "简单的数位概念", "数字的排列组合", "生活中的数学应用",
-            "数学游戏与趣味题", "数学思维训练入门"
+            "数学游戏与趣味题", "数学思维训练入门", "简单的利润问题"
         ],
         "二年级数学": [
             "乘法口诀记忆", "100以内加减法", "认识时间", "长度单位换算",
@@ -857,22 +857,24 @@ def generate_seo_data(title, content, tags):
     """生成Yoast SEO相关数据"""
     try:
         # 提取SEO标题
-        seo_title = f"{title} | 教育学习资源"
+        site_name = "GoGewu格物智库"
+        seo_title = f"{title} - {site_name}"
         
-        # 从内容中提取纯文本前150个字符作为描述
+        # 从内容中提取纯文本前155个字符作为描述
         plain_text = re.sub(r'<[^>]+>', '', content)
         plain_text = re.sub(r'\s+', ' ', plain_text)  # 将多个空格/换行符替换为单个空格
+        plain_text = plain_text.strip()
         
         # 截取合适的描述长度
         if len(plain_text) > 155:
             # 寻找句子结束点
             if '.' in plain_text[:155]:
                 end_pos = plain_text[:155].rfind('.') + 1
-                seo_description = plain_text[:end_pos].strip() + "..."
+                seo_description = plain_text[:end_pos].strip()
             else:
                 seo_description = plain_text[:150].strip() + "..."
         else:
-            seo_description = plain_text.strip()
+            seo_description = plain_text
         
         # 生成焦点关键词（从标题或标签中选择）
         focus_keyword = ""
@@ -888,9 +890,6 @@ def generate_seo_data(title, content, tags):
             title_words = jieba.lcut(title)
             focus_keyword = title_words[0] if title_words else title[:4]
         
-        # 生成meta关键词
-        meta_keywords = ",".join(tags[:5]) if len(tags) >= 5 else ",".join(tags)
-        
         # 创建完整的Yoast SEO数据结构
         seo_data = {
             "yoast_wpseo_title": seo_title,
@@ -901,15 +900,16 @@ def generate_seo_data(title, content, tags):
             "yoast_wpseo_canonical": "",  # 留空表示使用默认
             "yoast_wpseo_opengraph-title": seo_title,
             "yoast_wpseo_opengraph-description": seo_description,
+            "yoast_wpseo_opengraph-image": "",
             "yoast_wpseo_twitter-title": seo_title,
             "yoast_wpseo_twitter-description": seo_description,
+            "yoast_wpseo_twitter-image": "",
         }
         
         print(f"🔍 生成SEO数据:")
         print(f"  - SEO标题: {seo_title}")
         print(f"  - SEO描述: {seo_description}")
         print(f"  - 焦点关键词: {focus_keyword}")
-        print(f"  - Meta关键词: {meta_keywords}")
         
         return seo_data
         
@@ -939,11 +939,36 @@ def update_yoast_seo(post_id, seo_data):
             return True
         else:
             print(f"⚠️  Yoast SEO信息更新失败: {response.status_code}")
-            print(f"响应内容: {response.text[:200]}...")
             return False
             
     except Exception as e:
         print(f"❌ 更新Yoast SEO异常: {e}")
+        return False
+
+def fix_existing_post_seo(post_id, title, content, tags):
+    """修复已有文章的SEO信息"""
+    try:
+        print(f"🔧 修复文章SEO信息: ID={post_id}, 标题='{title}'")
+        
+        # 生成正确的SEO数据
+        seo_data = generate_seo_data(title, content, tags)
+        
+        if not seo_data:
+            print("❌ 无法生成SEO数据")
+            return False
+        
+        # 更新SEO信息
+        success = update_yoast_seo(post_id, seo_data)
+        
+        if success:
+            print(f"✅ 文章ID {post_id} 的SEO信息已修复")
+            return True
+        else:
+            print(f"❌ 无法修复文章ID {post_id} 的SEO信息")
+            return False
+            
+    except Exception as e:
+        print(f"❌ 修复SEO信息异常: {e}")
         return False
 
 def process_images_for_article(category, topic, content, post_id):
@@ -1097,19 +1122,14 @@ def post_to_wordpress_with_tags(title, content, category, slug):
                 if update_response.status_code == 200:
                     print("✅ 文章已发布（不含图片）")
             
-            # 更新Yoast SEO信息（如果需要）
-            if seo_data and update_needed:
-                print("🔍 更新Yoast SEO信息...")
-                update_yoast_seo(post_id, seo_data)
-            
-            return True
+            return True, post_id, tag_names
         else:
             print(f"❌ 发布失败: {response.text}")
-            return False
+            return False, None, None
             
     except Exception as e:
         print(f"❌ 发布异常: {e}")
-        return False
+        return False, None, None
 
 def select_topic_and_angle():
     """智能选择主题和角度"""
@@ -1192,15 +1212,42 @@ def main():
     
     # 发布到WordPress
     print("🌐 正在发布到 WordPress...")
-    success = post_to_wordpress_with_tags(topic, content, category, slug)
+    success, post_id, tag_names = post_to_wordpress_with_tags(topic, content, category, slug)
     
     if success:
         print("🎉 文章发布成功！")
+        
+        # 如果需要修复已有的文章（例如您提到的文章）
+        print("\n⚠️  如果需要修复已有文章的SEO信息，请运行修复函数")
+        print("   调用方式: fix_existing_post_seo(post_id, title, content, tags)")
+        
         return True
     else:
         print("💥 文章发布失败")
         return False
 
+def fix_problematic_article():
+    """修复有问题的文章"""
+    print("🔧 开始修复有问题的文章...")
+    
+    # 您需要替换以下信息为实际值
+    problem_post_id = 12345  # 替换为您的文章ID
+    problem_title = "探索神秘的'利润'世界"  # 替换为正确的标题
+    problem_content = "亲爱的小朋友们和家长们，你们知道什么是'利润'吗？它就像是我们小口袋里的零花钱..."  # 替换为实际内容
+    problem_tags = ["利润", "数学", "一年级数学", "计算", "应用题"]  # 替换为实际标签
+    
+    success = fix_existing_post_seo(problem_post_id, problem_title, problem_content, problem_tags)
+    
+    if success:
+        print("✅ 问题文章已修复")
+    else:
+        print("❌ 无法修复问题文章")
+
 if __name__ == "__main__":
+    # 正常发布新文章
     success = main()
+    
+    # 如果需要修复已有的问题文章，取消下面的注释并填写正确信息
+    # fix_problematic_article()
+    
     exit(0 if success else 1)
