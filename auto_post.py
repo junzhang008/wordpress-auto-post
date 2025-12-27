@@ -9,24 +9,26 @@ import jieba.analyse
 import time
 import re
 
-# --- 1. 完整全学段主题库 ---
+# --- 1. 大幅扩充的主题库 (涵盖全学段) ---
 TOPICS_BY_CATEGORY = {
-    "一年级数学": ["10以内加减法", "认识图形"], "六年级数学": ["圆的面积", "比例应用"],
-    "初中数学": ["有理数运算", "一元一次方程", "几何证明题", "函数图像"],
-    "初中物理": ["电路图绘制", "浮力计算", "透镜成像"],
-    "高中数学": ["三角函数变换", "圆锥曲线模板", "导数的意义"],
-    "高中物理": ["牛顿运动定律", "电磁感应", "动量守恒"],
-    "大学数学": ["高等数学极限", "线性代数矩阵", "概率论正态分布"],
-    "大学英语": ["四六级写作模板", "考研英语长难句", "学术论文表达"],
-    "大学专业课": ["算法分析", "宏观调控原理", "认知行为疗法"]
+    "一年级数学": ["10以内加减法口诀", "认识左右上下", "数一数与比一比", "认识钟表简单时间"],
+    "六年级数学": ["圆的周长与面积推导", "百分数应用题详解", "圆柱与圆锥体积比较", "扇形统计图分析"],
+    "初中数学": ["有理数的混合运算", "一元一次方程应用题", "勾股定理逆定理证明", "二次函数图像平移规律", "全等三角形判定"],
+    "初中物理": ["串并联电路电压规律", "浮力产生的原因", "平面镜成像实验", "动能与势能转化"],
+    "初中化学": ["金属活动性顺序表", "常用实验室仪器名称", "质量守恒定律验证", "饱和溶液与不饱和溶液"],
+    "高中数学": ["集合的运算符号", "三角函数诱导公式", "等差数列求和公式", "圆锥曲线离心率", "导数单调性研究"],
+    "高中物理": ["牛顿第二定律综合应用", "带电粒子在磁场中运动", "动量守恒动能不守恒分析", "光电效应方程"],
+    "高中化学": ["有机官能团化学性质", "原电池正负极判断", "勒夏特列原理应用", "物质的量浓度换算"],
+    "大学数学": ["泰勒公式展开技巧", "矩阵特征值与特征向量", "多元函数偏导数", "贝叶斯公式应用"],
+    "大学英语": ["CET4高频核心词汇", "考研英语长难句拆解", "学术论文摘要写作规范", "雅思口语提分思路"],
+    "大学专业课": ["Python数据结构与算法", "宏观经济学IS-LM模型", "心理学马斯洛需求层次", "管理学SWOT分析法"]
 }
 
 # --- 2. 基础配置 ---
 ZHIPU_API_KEY = os.getenv('ZHIPU_API_KEY')
 WORDPRESS_URL = os.getenv('WORDPRESS_URL').rstrip('/')
 WORDPRESS_USER = os.getenv('WORDPRESS_USER')
-WORDPRESS_PASSWORD = os.getenv('WORDPRESS_PASSWORD') # 请使用应用密码
-UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY')
+WORDPRESS_PASSWORD = os.getenv('WORDPRESS_PASSWORD')
 
 CATEGORY_MAP = {
     "一年级数学": 6, "六年级数学": 11,
@@ -35,24 +37,29 @@ CATEGORY_MAP = {
     "大学数学": 790, "大学英语": 789, "大学专业课": 792
 }
 
-# --- 3. 核心功能函数 ---
+# --- 3. 增强功能函数 ---
 
 def generate_random_slug(length=10):
     return ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(length))
 
-def get_or_create_tag(tag_name):
+def get_or_create_tag_id(tag_name):
+    """确保获取标签ID (修复后台无标签的关键)"""
     try:
         auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
-        res = requests.get(f"{WORDPRESS_URL}/wp-json/wp/v2/tags?search={tag_name}", auth=auth).json()
-        if res: return res[0]['id']
-        new_tag = requests.post(f"{WORDPRESS_URL}/wp-json/wp/v2/tags", json={'name': tag_name}, auth=auth).json()
+        # 搜索标签
+        res = requests.get(f"{WORDPRESS_URL}/wp-json/wp/v2/tags?search={tag_name}", auth=auth, timeout=10).json()
+        if res and isinstance(res, list):
+            for t in res:
+                if t['name'] == tag_name: return t['id']
+        # 创建标签
+        new_tag = requests.post(f"{WORDPRESS_URL}/wp-json/wp/v2/tags", json={'name': tag_name, 'slug': tag_name}, auth=auth, timeout=10).json()
         return new_tag.get('id')
     except: return None
 
-def upload_image(image_url, title):
-    """下载并上传图片到媒体库"""
+def upload_media(image_url, title):
+    """上传并获取媒体ID"""
     try:
-        img_data = requests.get(image_url, timeout=15).content
+        img_data = requests.get(image_url, timeout=20).content
         auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
         res = requests.post(
             f"{WORDPRESS_URL}/wp-json/wp/v2/media",
@@ -62,65 +69,70 @@ def upload_image(image_url, title):
         return res.get('id'), res.get('source_url')
     except: return None, None
 
-def get_zhipu_content(topic, category):
-    """AI 内容生成 - 自动识别身份"""
+def get_ai_content(topic, category):
+    """AI内容生成，强制包含图片占位符"""
     url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
     headers = {"Authorization": f"Bearer {ZHIPU_API_KEY}"}
     
-    # 身份适配逻辑
-    level = "教授" if "大学" in category else ("特级教师" if "高中" in category else "资深老师")
-    target = "大学生" if "大学" in category else "中小学生"
-
-    prompt = f"请以{level}身份，为{target}写一篇关于'{topic}'的深度教学文章。要求：使用HTML格式(h2,h3,p)，字数不少于1500字。内容需包含核心知识点、例题解析和学习建议。"
+    prompt = f"""你是一名资深教育专家，请为'{category}'学段的学生撰写关于'{topic}'的教学文章。
+    要求：
+    1. 使用HTML格式(h2, h3, p)，不少于1500字。
+    2. 内容需包含知识点拨、例题精讲和课后思考。
+    3. 必须在文中适当位置插入两个 [IMAGE_PLACEHOLDER] 标签。"""
     
-    data = {
-        "model": "glm-4",
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.7
-    }
-    res = requests.post(url, headers=headers, json=data).json()
+    data = {"model": "glm-4", "messages": [{"role": "user", "content": prompt}], "temperature": 0.8}
+    res = requests.post(url, headers=headers, json=data, timeout=60).json()
     return res['choices'][0]['message']['content']
 
-# --- 4. 发布主逻辑 ---
+# --- 4. 发布逻辑 ---
 
 def post_to_wordpress(title, content, category):
     auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
     cat_id = CATEGORY_MAP.get(category, 1)
     
-    # 获取特色图片 (保底策略)
-    img_url = f"https://source.unsplash.com/featured/?education,{category[-2:]}"
-    media_id, media_url = upload_image(img_url, title)
+    # 1. 准备标签 (从标题和分类中提取)
+    raw_tags = [category[:2], category[2:], title[:4], "学习资料", "格物智库"]
+    tag_ids = [get_or_create_tag_id(t) for t in raw_tags if get_or_create_tag_id(t)]
+
+    # 2. 处理图片
+    # 使用保底图库源，确保一定能抓到图
+    img_url = f"https://source.unsplash.com/featured/800x450/?education,{category[-2:]}"
+    media_id, media_src = upload_media(img_url, title)
     
-    # 构造文章内容：在开头强制插入一张图片，解决文中没图的问题
-    if media_url:
-        content = f'<p><img src="{media_url}" alt="{title}" style="border-radius:10px;" /></p>' + content
+    # 3. 强制在文中替换图片占位符 (解决文中无图)
+    if media_src:
+        img_html = f'<div style="text-align:center;"><img src="{media_src}" alt="{title}" style="border-radius:10px; max-width:100%;"/><p style="font-size:12px;color:#999;">{title} 相关图解</p></div>'
+        content = content.replace("[IMAGE_PLACEHOLDER]", img_html, 1) # 替换第一个占位符
+        content = content.replace("[IMAGE_PLACEHOLDER]", "", 1) # 删掉多余的
+        # 在正文最前面也加一张图
+        content = img_html + content
 
     post_data = {
         'title': title,
         'content': content,
         'status': 'publish',
         'categories': [cat_id],
-        'slug': generate_random_slug(),
+        'tags': tag_ids, # 发布标签ID列表
         'featured_media': media_id if media_id else 0,
-        # 这里的 meta 必须配合 functions.php 的注册才能生效
         'meta': {
-            'download_link': 'https://www.gogewu.com/dfdprt/', 
+            'download_link': 'https://www.gogewu.com/download-center/', 
             'download_code': '8888'
         }
     }
     
-    res = requests.post(f"{WORDPRESS_URL}/wp-json/wp/v2/posts", json=post_data, auth=auth)
+    res = requests.post(f"{WORDPRESS_URL}/wp-json/wp/v2/posts", json=post_data, auth=auth, timeout=30)
     if res.status_code == 201:
         print(f"✅ 发布成功: {title} (ID: {res.json()['id']})")
     else:
         print(f"❌ 发布失败: {res.text}")
 
 def main():
+    # 随机选择主题进行发布
     category = random.choice(list(TOPICS_BY_CATEGORY.keys()))
     topic = random.choice(TOPICS_BY_CATEGORY[category])
-    print(f"开始处理: {category} - {topic}")
+    print(f"🚀 开始处理: {category} - {topic}")
     
-    content = get_zhipu_content(topic, category)
+    content = get_ai_content(topic, category)
     if content:
         post_to_wordpress(topic, content, category)
 
