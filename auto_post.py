@@ -33,13 +33,13 @@ CATEGORY_MAP = {
 TOPICS_BY_CATEGORY = {
     # 小学部分
     "一年级数学": [
-        "10以内加减法练习", "认识数字1-100", "简单图形识别", "数字的大小比较", 
-        "认识钟表时间", "简单的数位概念", "数字的排列组合", "生活中的数学应用",
-        "数学游戏与趣味题", "数学思维训练入门", "简单的利润问题"
+        "10以内加减法", "认识数字1-100", "简单图形识别", "数字大小比较", 
+        "认识钟表时间", "简单数位概念", "数字排列组合", "生活中的数学",
+        "数学游戏与趣味题", "数学思维训练入门", "简单的利润计算"
     ],
     "二年级数学": [
         "乘法口诀记忆", "100以内加减法", "认识时间", "长度单位换算",
-        "人民币的认识", "简单的统计图表", "几何图形拼组", "数学逻辑推理",
+        "人民币的认识", "简单统计图表", "几何图形拼组", "数学逻辑推理",
         "数学应用题解析", "数学学习方法指导"
     ],
     "三年级数学": [
@@ -195,67 +195,217 @@ TOPICS_BY_CATEGORY = {
     ]
 }
 
-# 增强的图片关键词映射
+# 扩展图片关键词映射
 TOPIC_IMAGE_KEYWORDS = {
-    "数学": ["数学", "计算", "几何", "公式", "数字", "逻辑", "思维", "图形", "代数", "统计"],
-    "语文": ["语文", "阅读", "写作", "书籍", "文学", "汉字", "书法", "诗词", "故事", "文化"],
-    "英语": ["英语", "学习", "国际", "字母", "单词", "对话", "外语", "交流", "文化", "阅读"],
-    "物理": ["物理", "实验", "力学", "电磁", "光学", "科学", "公式", "实验设备", "物理现象"],
-    "化学": ["化学", "实验", "分子", "原子", "化学反应", "实验室", "化学式", "元素周期表"],
-    "专业课": ["专业", "学术", "研究", "实验室", "技术", "创新", "实践", "应用"],
-    "一年级": ["儿童", "基础", "入门", "简单", "趣味", "启蒙", "游戏", "卡通", "色彩"],
-    "二年级": ["儿童", "学习", "成长", "进步", "探索", "发现", "趣味", "互动"],
-    "三年级": ["学生", "学习", "教育", "校园", "思考", "进步", "成长", "探索"],
-    "四年级": ["学生", "教育", "学习", "课堂", "思考", "创造", "实践", "应用"],
-    "五年级": ["学生", "学习", "教育", "思考", "分析", "创新", "拓展", "深入"],
-    "六年级": ["学生", "毕业", "升学", "考试", "总结", "提升", "准备", "未来"],
-    "初中": ["初中生", "青少年", "中学", "校园", "成长", "学习", "教育", "青春期"],
-    "高中": ["高中生", "青少年", "中学", "校园", "学习", "高考", "教育", "青春"],
-    "大学": ["大学生", "青年", "大学", "校园", "学术", "研究", "图书馆", "实验室", "未来"]
+    "数学": ["数学", "计算", "几何", "公式", "数字", "逻辑", "思维", "图形", "代数", "统计", "测量", "图表", "坐标系", "函数", "微积分"],
+    "语文": ["语文", "阅读", "写作", "书籍", "文学", "汉字", "书法", "诗词", "故事", "文化", "古典文学", "现代文学", "作文", "阅读理解"],
+    "英语": ["英语", "学习", "国际", "字母", "单词", "对话", "外语", "交流", "文化", "阅读", "听力", "口语", "语法", "写作", "翻译"],
+    "物理": ["物理", "实验", "力学", "电磁", "光学", "科学", "公式", "实验设备", "物理现象", "运动学", "能量", "原子", "量子", "天文学"],
+    "化学": ["化学", "实验", "分子", "原子", "化学反应", "实验室", "化学式", "元素周期表", "有机化学", "无机化学", "化学键", "溶液", "催化剂"],
+    "专业课": ["专业", "学术", "研究", "实验室", "技术", "创新", "实践", "应用", "工程", "设计", "编程", "数据", "分析", "管理"],
+    "一年级": ["儿童", "基础", "入门", "简单", "趣味", "启蒙", "游戏", "卡通", "色彩", "玩偶", "积木", "玩具", "小朋友", "学前教育"],
+    "二年级": ["儿童", "学习", "成长", "进步", "探索", "发现", "趣味", "互动", "故事", "手工", "涂色", "绘画", "自然", "动物"],
+    "三年级": ["学生", "学习", "教育", "校园", "思考", "进步", "成长", "探索", "阅读", "写作", "计算", "科学", "自然", "社会"],
+    "四年级": ["学生", "教育", "学习", "课堂", "思考", "创造", "实践", "应用", "项目", "实验", "研究", "团队合作", "展示"],
+    "五年级": ["学生", "学习", "教育", "思考", "分析", "创新", "拓展", "深入", "探究", "讨论", "辩论", "研究", "科技"],
+    "六年级": ["学生", "毕业", "升学", "考试", "总结", "提升", "准备", "未来", "中学生", "青少年", "青春期", "独立思考", "自主学习"],
+    "初中": ["初中生", "青少年", "中学", "校园", "成长", "学习", "教育", "青春期", "运动", "友谊", "考试", "社团", "实验", "图书馆"],
+    "高中": ["高中生", "青少年", "中学", "校园", "学习", "高考", "教育", "青春", "大学准备", "实验室", "自习", "讨论", "竞争", "目标"],
+    "大学": ["大学生", "青年", "大学", "校园", "学术", "研究", "图书馆", "实验室", "未来", "讲座", "社团", "实习", "就业", "创新"]
 }
 
-# 文章角度库 - 让内容更加丰富
+# 扩展文章角度库
 ARTICLE_ANGLES = {
     "数学": [
         "实用解题技巧", "常见错误分析", "思维训练方法", "生活应用实例",
         "趣味数学游戏", "考试重点解析", "学习方法指导", "知识点深度解析",
-        "数学思维培养", "实际应用案例", "解题思路分析", "知识点串联"
+        "数学思维培养", "实际应用案例", "解题思路分析", "知识点串联",
+        "数学史故事", "数学与科技", "数学建模入门", "数学竞赛准备"
     ],
     "语文": [
         "阅读方法指导", "写作技巧分享", "文学欣赏方法", "语言表达训练",
         "传统文化学习", "阅读理解策略", "作文构思方法", "诗词鉴赏技巧",
-        "语言运用能力", "文学素养提升", "名著导读解析", "文化内涵解读"
+        "语言运用能力", "文学素养提升", "名著导读解析", "文化内涵解读",
+        "文言文学习", "现代文分析", "修辞手法应用", "文学创作指导"
     ],
     "英语": [
         "口语练习方法", "单词记忆技巧", "语法学习策略", "听力训练方法",
         "阅读能力提升", "写作技巧指导", "文化交流知识", "学习方法分享",
-        "实际应用场景", "考试准备策略", "语言运用实践", "跨文化交际"
+        "实际应用场景", "考试准备策略", "语言运用实践", "跨文化交际",
+        "英语演讲技巧", "翻译方法指导", "商务英语学习", "学术英语写作"
     ],
     "物理": [
         "实验操作方法", "物理原理应用", "问题解决方法", "思维训练方法",
         "物理模型建立", "物理公式推导", "实验设计思路", "物理现象解释",
-        "物理与科技", "物理学习方法", "科学探究方法", "物理思维培养"
+        "物理与科技", "物理学习方法", "科学探究方法", "物理思维培养",
+        "物理史故事", "物理实验设计", "物理竞赛准备", "物理前沿知识"
     ],
     "化学": [
         "实验安全操作", "化学反应原理", "化学计算技巧", "化学思维方法",
         "物质性质分析", "化学实验设计", "化学与生活", "化学学习方法",
-        "化学现象解释", "化学方程式书写", "化学与环保", "科学探究素养"
+        "化学现象解释", "化学方程式书写", "化学与环保", "科学探究素养",
+        "化学史故事", "化学工业应用", "化学竞赛准备", "绿色化学理念"
     ],
     "专业课": [
         "专业基础理论", "专业实践应用", "专业学习方法", "专业前沿动态",
         "专业技能训练", "专业思维培养", "专业与就业", "专业与创新",
-        "专业素养提升", "专业与行业", "专业与科技", "专业与未来"
+        "专业素养提升", "专业与行业", "专业与科技", "专业与未来",
+        "专业发展趋势", "专业认证准备", "专业项目实践", "专业实习指导"
     ]
 }
 
-# 图片类型库
+# 扩展图片类型库
 IMAGE_TYPES = [
     "概念图解", "实例演示", "步骤说明", "对比分析", 
-    "应用场景", "趣味插图", "知识总结", "思维导图"
+    "应用场景", "趣味插图", "知识总结", "思维导图",
+    "历史背景", "人物介绍", "工具展示", "流程图解",
+    "数据图表", "案例分析", "实际操作", "成果展示"
 ]
+
+# 扩展免费图片库
+STOCK_IMAGE_LIBRARY = {
+    "数学": [
+        "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
+        "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?w=800",
+        "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=800",
+        "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
+        "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800"
+    ],
+    "语文": [
+        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800",
+        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800",
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800",
+        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
+        "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800",
+        "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?w=800",
+        "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?w=800",
+        "https://images.unsplash.com/photo-1506880135364-e28660dc35fa?w=800",
+        "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800",
+        "https://images.unsplash.com/photo-1506880135364-e28660dc35fa?w=800"
+    ],
+    "英语": [
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
+        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800"
+    ],
+    "物理": [
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800"
+    ],
+    "化学": [
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800"
+    ],
+    "专业课": [
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800"
+    ],
+    "通用教育": [
+        "https://images.unsplash.com/photo-1497636577773-f1231844b336?w=800",
+        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
+        "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800",
+        "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800"
+    ],
+    "小学": [
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800"
+    ],
+    "初中": [
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800"
+    ],
+    "高中": [
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800"
+    ],
+    "大学": [
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800"
+    ]
+}
 
 # 标签缓存
 TAG_CACHE = {}
+
+# 图片缓存，避免同一篇文章中重复使用相同的图片
+USED_IMAGES_CACHE = {
+    'session': set(),  # 本次运行中已使用的图片
+    'global': set()    # 全局已使用的图片（如果需要跨会话去重）
+}
 
 def generate_random_slug(length=8):
     """生成随机别名"""
@@ -472,55 +622,92 @@ def get_image_keywords(category, topic, image_type):
     
     # 根据图片类型添加关键词
     if image_type == "概念图解":
-        keywords.extend(["图解", "说明", "解析", "示意图"])
+        keywords.extend(["图解", "说明", "解析", "示意图", "图表", "示意图解"])
     elif image_type == "实例演示":
-        keywords.extend(["实例", "演示", "示例", "案例"])
+        keywords.extend(["实例", "演示", "示例", "案例", "示范", "展示"])
     elif image_type == "步骤说明":
-        keywords.extend(["步骤", "流程", "顺序", "方法"])
+        keywords.extend(["步骤", "流程", "顺序", "方法", "过程", "教程"])
     elif image_type == "对比分析":
-        keywords.extend(["对比", "比较", "分析", "差异"])
+        keywords.extend(["对比", "比较", "分析", "差异", "优缺点", "区别"])
     elif image_type == "应用场景":
-        keywords.extend(["应用", "场景", "实践", "使用"])
+        keywords.extend(["应用", "场景", "实践", "使用", "情境", "案例"])
     elif image_type == "趣味插图":
-        keywords.extend(["趣味", "插图", "卡通", "生动"])
+        keywords.extend(["趣味", "插图", "卡通", "生动", "有趣", "漫画"])
     elif image_type == "知识总结":
-        keywords.extend(["总结", "归纳", "要点", "重点"])
+        keywords.extend(["总结", "归纳", "要点", "重点", "核心", "精髓"])
     elif image_type == "思维导图":
-        keywords.extend(["思维", "导图", "结构", "关系"])
+        keywords.extend(["思维", "导图", "结构", "关系", "脑图", "架构"])
+    elif image_type == "历史背景":
+        keywords.extend(["历史", "背景", "发展", "起源", "演变", "故事"])
+    elif image_type == "人物介绍":
+        keywords.extend(["人物", "介绍", "肖像", "成就", "贡献", "生平"])
+    elif image_type == "工具展示":
+        keywords.extend(["工具", "展示", "设备", "仪器", "软件", "应用"])
+    elif image_type == "流程图解":
+        keywords.extend(["流程", "图解", "步骤图", "过程图", "示意图", "图表"])
+    elif image_type == "数据图表":
+        keywords.extend(["数据", "图表", "统计", "分析", "图形", "报表"])
+    elif image_type == "案例分析":
+        keywords.extend(["案例", "分析", "实例", "研究", "问题", "解决"])
+    elif image_type == "实际操作":
+        keywords.extend(["操作", "实践", "动手", "实验", "演示", "练习"])
+    elif image_type == "成果展示":
+        keywords.extend(["成果", "展示", "作品", "效果", "成绩", "成就"])
     
     # 添加教育相关通用关键词
-    keywords.extend(["教育", "学习", "学校", "课堂", "学生"])
+    keywords.extend(["教育", "学习", "学校", "课堂", "学生", "教学", "知识", "技能"])
+    
+    # 添加一些随机的通用关键词以增加多样性
+    random_keywords = ["创意", "创新", "科技", "未来", "智能", "现代", "传统", "文化"]
+    keywords.extend(random.sample(random_keywords, 2))
     
     # 去重并限制数量
-    unique_keywords = list(set(keywords))[:6]
+    unique_keywords = list(set(keywords))
     
-    print(f"🖼️  图片搜索关键词({image_type}): {unique_keywords}")
-    return unique_keywords
+    # 随机排序，确保每次获取不同的关键词组合
+    random.shuffle(unique_keywords)
+    
+    # 选择8-10个关键词
+    selected_keywords = unique_keywords[:random.randint(8, 10)]
+    
+    print(f"🖼️  图片搜索关键词({image_type}): {selected_keywords}")
+    return selected_keywords
 
-def get_unsplash_image(keywords):
-    """从Unsplash获取相关图片"""
+def get_unsplash_image(keywords, attempt=0, max_attempts=3):
+    """从Unsplash获取相关图片，增加多样性"""
     if not UNSPLASH_ACCESS_KEY:
         print("⚠️  Unsplash访问密钥未设置")
         return None
         
     try:
-        # 随机选择一个关键词组合
-        keyword_combinations = [
-            " ".join(keywords[:2]),
-            " ".join(keywords[2:4]),
-            keywords[0] + " education",
-            "learning " + keywords[1],
-            keywords[0] + " student",
-            keywords[0] + " school"
-        ]
+        # 随机选择不同的关键词组合
+        if len(keywords) >= 2:
+            # 创建多种关键词组合
+            keyword_combinations = [
+                " ".join(keywords[:2]),
+                " ".join(keywords[2:4]) if len(keywords) >= 4 else " ".join(keywords[:2]),
+                " ".join(keywords[4:6]) if len(keywords) >= 6 else " ".join(keywords[:2]),
+                keywords[0] + " education learning",
+                keywords[1] + " study school" if len(keywords) >= 2 else keywords[0] + " study",
+                keywords[0] + " student classroom",
+                random.choice(keywords) + " " + random.choice(["education", "learning", "school", "study"]),
+                " ".join(random.sample(keywords, min(3, len(keywords))))
+            ]
+        else:
+            keyword_combinations = [keywords[0] + " education"]
         
-        keyword = random.choice(keyword_combinations)
+        # 根据尝试次数选择不同的关键词组合
+        keyword_index = min(attempt, len(keyword_combinations) - 1)
+        keyword = keyword_combinations[keyword_index]
+        
+        print(f"  🔍 尝试 {attempt+1}/{max_attempts}: 搜索关键词 '{keyword}'")
         
         url = "https://api.unsplash.com/photos/random"
         params = {
             "query": keyword,
             "orientation": "landscape",
-            "content_filter": "high"
+            "content_filter": "high",
+            "count": 3  # 一次获取3张图片，选择最好的一张
         }
         headers = {
             "Authorization": f"Client-ID {UNSPLASH_ACCESS_KEY}"
@@ -530,9 +717,38 @@ def get_unsplash_image(keywords):
         
         if response.status_code == 200:
             data = response.json()
-            image_url = data['urls']['regular']
-            print(f"✅ 从Unsplash获取图片: {image_url}")
-            return image_url
+            
+            # 如果返回的是列表，选择一张图片
+            if isinstance(data, list) and len(data) > 0:
+                # 随机选择一张图片
+                photo_data = random.choice(data)
+                image_url = photo_data['urls']['regular']
+                
+                # 检查是否已经在本次会话中使用过
+                if image_url in USED_IMAGES_CACHE['session']:
+                    print(f"  ⚠️  图片已使用过，尝试其他图片")
+                    if len(data) > 1:
+                        # 选择另一张图片
+                        other_photos = [p for p in data if p['urls']['regular'] != image_url]
+                        if other_photos:
+                            photo_data = random.choice(other_photos)
+                            image_url = photo_data['urls']['regular']
+                
+                # 添加到已使用图片缓存
+                USED_IMAGES_CACHE['session'].add(image_url)
+                
+                # 获取图片描述
+                description = photo_data.get('description', '')
+                alt_text = photo_data.get('alt_description', keyword)
+                
+                print(f"✅ 从Unsplash获取图片: {image_url}")
+                if description:
+                    print(f"   描述: {description[:50]}...")
+                
+                return image_url
+            else:
+                print(f"⚠️  Unsplash返回了空结果")
+                return None
         else:
             print(f"⚠️  Unsplash API请求失败: {response.status_code}")
             return None
@@ -541,66 +757,90 @@ def get_unsplash_image(keywords):
         print(f"❌ Unsplash图片获取失败: {e}")
         return None
 
-def get_stock_image(keywords):
-    """获取免费库存图片（备用方案）"""
-    # 根据关键词选择合适的图片
-    if "数学" in keywords or "计算" in keywords or "公式" in keywords:
-        math_images = [
-            "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-            "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?w=800",
-            "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-            "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800"
-        ]
-        return random.choice(math_images)
-    elif "语文" in keywords or "阅读" in keywords or "书籍" in keywords:
-        chinese_images = [
-            "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800",
-            "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800",
-            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800",
-            "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800"
-        ]
-        return random.choice(chinese_images)
-    elif "英语" in keywords or "字母" in keywords or "单词" in keywords:
-        english_images = [
-            "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
-            "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
-            "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
-            "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800"
-        ]
-        return random.choice(english_images)
-    elif "物理" in keywords or "实验" in keywords or "科学" in keywords:
-        physics_images = [
-            "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
-            "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
-            "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
-            "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800"
-        ]
-        return random.choice(physics_images)
-    elif "化学" in keywords or "实验" in keywords or "实验室" in keywords:
-        chemistry_images = [
-            "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
-            "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
-            "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
-            "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800"
-        ]
-        return random.choice(chemistry_images)
-    elif "大学" in keywords or "学术" in keywords or "研究" in keywords:
-        university_images = [
-            "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
-            "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
-            "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
-            "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800"
-        ]
-        return random.choice(university_images)
+def get_stock_image(category, topic, image_type, used_urls=None):
+    """获取免费库存图片（扩展版本）"""
+    if used_urls is None:
+        used_urls = set()
+    
+    # 提取学科
+    if "初中" in category or "高中" in category or "大学" in category:
+        if "初中" in category:
+            subject = category[2:]
+        elif "高中" in category:
+            subject = category[2:]
+        else:  # 大学
+            subject = category[2:]
     else:
-        # 默认返回学习相关图片
-        education_images = [
+        subject = category[3:]
+    
+    # 根据学科选择图片库
+    if subject in STOCK_IMAGE_LIBRARY:
+        image_pool = STOCK_IMAGE_LIBRARY[subject]
+    else:
+        # 如果没有对应的学科，使用通用教育图片
+        image_pool = STOCK_IMAGE_LIBRARY.get("通用教育", [])
+    
+    # 添加年级相关的图片
+    if "初中" in category or "高中" in category or "大学" in category:
+        if "初中" in category:
+            grade_pool = STOCK_IMAGE_LIBRARY.get("初中", [])
+        elif "高中" in category:
+            grade_pool = STOCK_IMAGE_LIBRARY.get("高中", [])
+        else:  # 大学
+            grade_pool = STOCK_IMAGE_LIBRARY.get("大学", [])
+    else:
+        grade_pool = STOCK_IMAGE_LIBRARY.get("小学", [])
+    
+    # 合并图片池
+    all_images = list(set(image_pool + grade_pool + STOCK_IMAGE_LIBRARY.get("通用教育", [])))
+    
+    if not all_images:
+        # 如果还是没有图片，使用默认图片
+        default_images = [
             "https://images.unsplash.com/photo-1497636577773-f1231844b336?w=800",
             "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
             "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800",
             "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800"
         ]
-        return random.choice(education_images)
+        all_images = default_images
+    
+    # 过滤掉已使用的图片
+    available_images = [img for img in all_images if img not in used_urls]
+    
+    if not available_images:
+        print(f"  ⚠️  所有图片都已使用过，重新使用图片池")
+        available_images = all_images
+    
+    # 随机选择一张图片
+    selected_image = random.choice(available_images)
+    
+    # 添加到已使用列表
+    if used_urls is not None:
+        used_urls.add(selected_image)
+    
+    print(f"✅ 从备用图库获取图片: {selected_image}")
+    return selected_image
+
+def get_diverse_image(category, topic, image_type, used_urls=None):
+    """获取多样化的图片，避免重复"""
+    if used_urls is None:
+        used_urls = set()
+    
+    # 先尝试从Unsplash获取
+    keywords = get_image_keywords(category, topic, image_type)
+    
+    # 尝试多次从Unsplash获取
+    for attempt in range(3):
+        image_url = get_unsplash_image(keywords, attempt)
+        if image_url and image_url not in used_urls:
+            used_urls.add(image_url)
+            return image_url
+        elif image_url:
+            print(f"  ⚠️  Unsplash图片已使用过，尝试其他来源")
+    
+    # 如果Unsplash失败或重复，使用备用图库
+    print(f"  🔄 Unsplash无合适图片，使用备用图库")
+    return get_stock_image(category, topic, image_type, used_urls)
 
 def upload_image_to_wordpress(image_url, title, alt_text=""):
     """上传图片到WordPress并返回媒体ID和图片信息"""
@@ -699,7 +939,7 @@ def add_featured_image(post_id, media_id):
         return False
 
 def clean_html_content(content):
-    """清理HTML内容，移除无效标签 - 修复版本"""
+    """清理HTML内容，移除无效标签"""
     if not content:
         return content
     
@@ -769,11 +1009,78 @@ def insert_images_into_content(content, images_data):
     
     return content_with_images
 
+def generate_extended_title(base_topic, category, angle):
+    """生成扩展的标题（10-20字）"""
+    # 定义标题模板
+    templates = [
+        "【{grade}{subject}】{base_topic}：{angle}的详细讲解与实用指南",
+        "{grade}{subject}必备：{base_topic}的{angle}与学习方法全解析",
+        "深度解析{base_topic}：{grade}{subject}的{angle}与应用技巧",
+        "{grade}{subject}学习指南：{base_topic}的{angle}与实用技巧",
+        "全面掌握{base_topic}：{grade}{subject}的{angle}与解题方法",
+        "{grade}{subject}重点知识：{base_topic}的{angle}详解与应用",
+        "{base_topic}完全指南：{grade}{subject}的{angle}与实践练习",
+        "高效学习{base_topic}：{grade}{subject}的{angle}与技巧分享",
+        "{grade}{subject}核心内容：{base_topic}的{angle}深度解析",
+        "{base_topic}全攻略：{grade}{subject}的{angle}与学习策略"
+    ]
+    
+    # 提取年级和科目
+    if "初中" in category or "高中" in category or "大学" in category:
+        if "初中" in category:
+            grade = "初中"
+            subject = category[2:]
+        elif "高中" in category:
+            grade = "高中"
+            subject = category[2:]
+        else:  # 大学
+            grade = "大学"
+            subject = category[2:]
+    else:
+        grade = "小学"
+        subject = category[3:]
+    
+    # 从模板中随机选择一个
+    template = random.choice(templates)
+    
+    # 生成标题
+    title = template.format(
+        grade=grade,
+        subject=subject,
+        base_topic=base_topic,
+        angle=angle
+    )
+    
+    # 确保标题长度在10-20字之间
+    title_length = len(title)
+    if title_length < 10:
+        # 如果太短，添加一些修饰语
+        prefixes = [
+            "深度解析：", "详细讲解：", "完全掌握：", "高效学习：", 
+            "全面了解：", "系统学习：", "轻松掌握：", "快速上手："
+        ]
+        title = random.choice(prefixes) + title
+    elif title_length > 20:
+        # 如果太长，适当缩短
+        # 保持核心信息
+        title_words = list(title)
+        if len(title_words) > 20:
+            # 尝试找到合适的断点
+            for i in range(20, 0, -1):
+                if title_words[i] in ['，', '：', '、', '；']:
+                    title = ''.join(title_words[:i+1])
+                    break
+            else:
+                title = ''.join(title_words[:20]) + "..."
+    
+    print(f"📝 生成扩展标题: {title} (长度: {len(title)}字)")
+    return title
+
 def get_zhipu_ai_content(topic, category, angle):
-    """使用智谱AI生成丰富内容的文章 - 修复版本"""
+    """使用智谱AI生成丰富内容的文章"""
     if not ZHIPU_API_KEY:
         print("❌ 智谱API密钥未设置")
-        return None
+        return None, None
         
     url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
     
@@ -816,9 +1123,14 @@ def get_zhipu_ai_content(topic, category, angle):
     else:
         difficulty = "适合小学生阅读，语言亲切易懂但专业"
     
+    # 扩展标题
+    extended_title = generate_extended_title(topic, category, angle)
+    
     # 修复提示词
     prompt = f"""
 请以专业教师的身份，为{student_type}写一篇关于'{topic}'的详细学习文章，重点角度是：{angle}。
+
+**文章标题：{extended_title}**
 
 **写作要求：**
 1. 面向{student_type}，{difficulty}
@@ -835,6 +1147,7 @@ def get_zhipu_ai_content(topic, category, angle):
 
 5. 使用干净的HTML格式，只使用：<h2>, <h3>, <p>, <ul>, <li>, <strong>, <em>
 6. 确保文章完整，不要中途停止
+7. 文章内容要与标题'{extended_title}'保持一致
 
 请直接开始文章写作：
     """
@@ -844,7 +1157,7 @@ def get_zhipu_ai_content(topic, category, angle):
         "messages": [
             {
                 "role": "system", 
-                "content": f"你是一个经验丰富的{grade}教师，擅长用适当的语言解释复杂概念，能够激发学生的学习兴趣。特别注意：必须生成完整的长文章，至少2000字，包含所有要求的部分。"
+                "content": f"你是一个经验丰富的{grade}教师，擅长用适当的语言解释复杂概念，能够激发学生的学习兴趣。特别注意：1. 必须生成完整的长文章，至少2000字，包含所有要求的部分；2. 文章标题是'{extended_title}'，请围绕这个标题展开内容。"
             },
             {
                 "role": "user", 
@@ -875,25 +1188,25 @@ def get_zhipu_ai_content(topic, category, angle):
             if cleaned_content != content:
                 print(f"✅ 已清理HTML，从{len(content)}字符减少到{len(cleaned_content)}字符")
             
-            return cleaned_content
+            return extended_title, cleaned_content
         else:
             print(f"❌ API请求失败: {response.status_code}")
             print(f"错误详情: {response.text[:200]}")
-            return None
+            return None, None
     except Exception as e:
         print(f"❌ AI生成失败: {e}")
-        return None
+        return None, None
 
 def retry_ai_generation(topic, category, angle, max_retries=2):
     """重试AI生成，直到获得足够长度的内容"""
     for attempt in range(max_retries + 1):
         print(f"🔄 第{attempt+1}次尝试生成内容...")
         
-        content = get_zhipu_ai_content(topic, category, angle)
+        extended_title, content = get_zhipu_ai_content(topic, category, angle)
         
         if content and len(content) > 1500:
             print(f"✅ 第{attempt+1}次尝试成功，获得{len(content)}字符的内容")
-            return content
+            return extended_title, content
         elif content and len(content) > 0:
             print(f"⚠️  第{attempt+1}次尝试内容长度{len(content)}字符，尝试重试...")
             if attempt < max_retries:
@@ -903,7 +1216,7 @@ def retry_ai_generation(topic, category, angle, max_retries=2):
             if attempt < max_retries:
                 time.sleep(2)
     
-    return content
+    return extended_title, content
 
 def generate_complete_seo_data(title, content, tags, category):
     """生成完整的SEO数据"""
@@ -963,28 +1276,41 @@ def generate_complete_seo_data(title, content, tags, category):
         return None
 
 def process_images_for_article(category, topic, content, post_id):
-    """为文章处理多张图片"""
+    """为文章处理多张图片 - 增加多样性"""
     try:
         images_data = []
+        used_image_urls = set()  # 本次文章已使用的图片URL
         
-        # 为文章生成2-3张不同类型的图片
-        num_images = random.randint(2, 3)
-        selected_image_types = random.sample(IMAGE_TYPES, num_images)
+        # 为文章生成3-4张不同类型的图片
+        num_images = random.randint(3, 4)
+        
+        # 从图片类型库中选择不重复的类型
+        available_types = IMAGE_TYPES.copy()
+        random.shuffle(available_types)
+        selected_image_types = available_types[:num_images]
+        
+        print(f"🖼️  为文章选择 {num_images} 张图片，类型: {selected_image_types}")
         
         for i, image_type in enumerate(selected_image_types):
-            # 生成图片关键词
-            image_keywords = get_image_keywords(category, topic, image_type)
-            
-            # 获取图片URL
-            image_url = get_unsplash_image(image_keywords)
-            if not image_url:
-                image_url = get_stock_image(image_keywords)
+            # 获取多样化的图片
+            image_url = get_diverse_image(category, topic, image_type, used_image_urls)
             
             if image_url:
-                # 上传图片到WordPress
-                alt_text = f"{topic} - {image_type}"
+                # 生成有意义的alt文本
+                if "初中" in category or "高中" in category or "大学" in category:
+                    if "初中" in category:
+                        grade = "初中"
+                    elif "高中" in category:
+                        grade = "高中"
+                    else:  # 大学
+                        grade = "大学"
+                else:
+                    grade = category[:3]
+                
+                alt_text = f"{grade}{topic} - {image_type}"
                 caption = f"{image_type}: {topic}"
                 
+                # 上传图片到WordPress
                 upload_result = upload_image_to_wordpress(image_url, f"{topic}_{image_type}", alt_text)
                 
                 if upload_result:
@@ -996,12 +1322,15 @@ def process_images_for_article(category, topic, content, post_id):
                         'type': image_type
                     })
                     print(f"✅ 成功处理图片 {i+1}: {image_type}")
-                
-                # 如果是第一张图片，设置为特色图片
-                if i == 0 and upload_result and 'media_id' in upload_result:
-                    add_featured_image(post_id, upload_result['media_id'])
+                    
+                    # 如果是第一张图片，设置为特色图片
+                    if i == 0 and upload_result and 'media_id' in upload_result:
+                        add_featured_image(post_id, upload_result['media_id'])
+                else:
+                    print(f"⚠️  图片上传失败: {image_url}")
             
-            time.sleep(1)
+            # 添加延迟避免请求过快
+            time.sleep(random.uniform(1, 2))
         
         # 在内容中插入所有图片
         if images_data:
@@ -1010,221 +1339,3 @@ def process_images_for_article(category, topic, content, post_id):
         else:
             print("⚠️  无法获取图片，使用原内容")
             return content, []
-            
-    except Exception as e:
-        print(f"❌ 图片处理异常: {e}")
-        return content, []
-
-def post_to_wordpress_with_complete_seo(title, content, category, slug):
-    """发布到WordPress，包含完整的SEO信息"""
-    try:
-        api_url = WORDPRESS_URL.rstrip('/') + '/wp-json/wp/v2/posts'
-        
-        # 检查内容长度
-        if len(content) < 800:
-            print(f"⚠️  警告：文章内容过短，只有{len(content)}字符")
-        
-        # 生成智能标签名称
-        tag_names = generate_smart_tags(category, content, title)
-        
-        # 将标签名称转换为标签ID
-        tag_ids = get_tag_ids(tag_names)
-        
-        auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
-        
-        # 获取分类ID
-        category_id = CATEGORY_MAP.get(category, 1)
-        
-        # 生成完整的SEO数据
-        seo_data = generate_complete_seo_data(title, content, tag_names, category)
-        
-        # 构建文章数据
-        post_data = {
-            'title': title,
-            'content': content,
-            'status': 'draft',
-            'categories': [category_id],
-            'slug': slug
-        }
-        
-        # 添加标签
-        if tag_ids:
-            post_data['tags'] = tag_ids
-        
-        # 添加完整的SEO数据
-        if seo_data:
-            post_data['meta'] = seo_data
-        
-        print(f"📤 发布数据准备完成:")
-        print(f"  - 标题: {title}")
-        print(f"  - 分类: {category}(ID:{category_id})")
-        print(f"  - 别名: {slug}")
-        print(f"  - 标签数量: {len(tag_ids)}")
-        print(f"  - 文章长度: {len(content)}字符")
-        
-        # 发布文章
-        response = requests.post(api_url, json=post_data, auth=auth, timeout=30)
-        print(f"🌐 WordPress响应状态: {response.status_code}")
-        
-        if response.status_code == 201:
-            post_data = response.json()
-            post_id = post_data['id']
-            print(f"✅ 文章保存为草稿成功！文章ID: {post_id}")
-            
-            # 处理图片
-            print("🖼️  开始处理文章图片...")
-            updated_content, images_data = process_images_for_article(category, title, content, post_id)
-            
-            # 更新文章内容并发布
-            update_needed = False
-            update_data = {'status': 'publish'}
-            
-            if updated_content != content and images_data:
-                update_data['content'] = updated_content
-                update_needed = True
-            
-            if update_needed:
-                update_response = requests.post(
-                    f"{api_url}/{post_id}",
-                    json=update_data,
-                    auth=auth,
-                    timeout=10
-                )
-                if update_response.status_code == 200:
-                    print("✅ 文章已更新包含图片并发布")
-                else:
-                    print(f"⚠️  文章内容更新失败: {update_response.status_code}")
-            else:
-                update_response = requests.post(
-                    f"{api_url}/{post_id}",
-                    json=update_data,
-                    auth=auth,
-                    timeout=10
-                )
-                if update_response.status_code == 200:
-                    print("✅ 文章已发布")
-            
-            return True, post_id, tag_names
-        else:
-            print(f"❌ 发布失败: {response.status_code}")
-            print(f"错误详情: {response.text[:200]}")
-            return False, None, None
-            
-    except Exception as e:
-        print(f"❌ 发布异常: {e}")
-        return False, None, None
-
-def select_topic_and_angle():
-    """智能选择主题和角度 - 确保包含所有学段"""
-    # 将所有分类按学段分组
-    all_categories = list(TOPICS_BY_CATEGORY.keys())
-    
-    # 计算各学段分类
-    primary_categories = [c for c in all_categories if "一年级" in c or "二年级" in c or "三年级" in c or "四年级" in c or "五年级" in c or "六年级" in c]
-    middle_categories = [c for c in all_categories if "初中" in c]
-    high_categories = [c for c in all_categories if "高中" in c]
-    university_categories = [c for c in all_categories if "大学" in c]
-    
-    print(f"📊 分类统计:")
-    print(f"  小学分类: {len(primary_categories)}个")
-    print(f"  初中分类: {len(middle_categories)}个")
-    print(f"  高中分类: {len(high_categories)}个")
-    print(f"  大学分类: {len(university_categories)}个")
-    
-    # 创建加权选择列表，确保每个学段都有机会
-    # 权重设置为：小学25%，初中25%，高中25%，大学25%
-    all_categories_groups = [
-        primary_categories,
-        middle_categories,
-        high_categories,
-        university_categories
-    ]
-    
-    # 过滤掉空组
-    valid_groups = [group for group in all_categories_groups if group]
-    
-    if not valid_groups:
-        print("❌ 错误：没有可用的分类")
-        return "未知分类", "未知主题", "未知角度"
-    
-    # 随机选择一个学段
-    selected_group = random.choice(valid_groups)
-    category = random.choice(selected_group)
-    
-    # 从该分类中选择主题
-    if category in TOPICS_BY_CATEGORY and TOPICS_BY_CATEGORY[category]:
-        topic = random.choice(TOPICS_BY_CATEGORY[category])
-    else:
-        topic = f"{category}学习资料"
-    
-    # 根据科目选择角度
-    if "初中" in category or "高中" in category or "大学" in category:
-        if "初中" in category:
-            subject = category[2:]
-        elif "高中" in category:
-            subject = category[2:]
-        else:  # 大学
-            subject = category[2:]
-    else:
-        subject = category[3:]
-    
-    if subject in ARTICLE_ANGLES:
-        angle = random.choice(ARTICLE_ANGLES[subject])
-    else:
-        angle_list = ["学习方法指导", "知识深度解析", "实践应用案例", "考试重点解析"]
-        angle = random.choice(angle_list)
-    
-    return category, topic, angle
-
-def main():
-    print("🚀 开始自动发布文章流程...")
-    print(f"📅 当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    
-    # 检查环境变量
-    if not all([ZHIPU_API_KEY, WORDPRESS_URL, WORDPRESS_USER, WORDPRESS_PASSWORD]):
-        print("❌ 错误：缺少必要的环境变量配置")
-        return False
-    
-    # 检查主题库
-    total_topics = sum(len(topics) for topics in TOPICS_BY_CATEGORY.values())
-    print(f"📚 主题库加载完成，共 {len(TOPICS_BY_CATEGORY)} 个分类，{total_topics} 个主题")
-    
-    # 发布新文章
-    print("\n📝 正在选择文章主题...")
-    category, topic, angle = select_topic_and_angle()
-    
-    print(f"\n{'='*50}")
-    print(f"📖 分类: {category}")
-    print(f"🎯 主题: {topic}")
-    print(f"📐 角度: {angle}")
-    
-    # 生成别名
-    slug = generate_random_slug(random.randint(6, 10))
-    print(f"🔗 文章别名: {slug}")
-    
-    # 获取AI内容（带重试机制）
-    print("\n🤖 正在调用AI生成内容...")
-    content = retry_ai_generation(topic, category, angle, max_retries=2)
-    
-    if not content:
-        print("❌ 内容生成失败")
-        return False
-    
-    print(f"✅ 内容生成成功，长度: {len(content)}字符")
-    
-    # 发布文章
-    print("\n🌐 正在发布到WordPress...")
-    success, post_id, tag_names = post_to_wordpress_with_complete_seo(topic, content, category, slug)
-    
-    if success:
-        print("\n🎉 文章发布成功！")
-        print(f"🔗 文章链接: {WORDPRESS_URL.rstrip('/')}/?p={post_id}")
-        return True
-    else:
-        print("💥 文章发布失败")
-        return False
-
-
-if __name__ == "__main__":
-    success = main()
-    exit(0 if success else 1)
