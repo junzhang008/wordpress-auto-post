@@ -31,58 +31,131 @@ CATEGORY_MAP = {
 # 完整主题库
 TOPICS_BY_CATEGORY = {
     # 小学部分
-    "一年级数学": ["10以内加减法", "认识数字1-100", "简单图形识别", "数字大小比较"],
-    "二年级数学": ["乘法口诀记忆", "100以内加减法", "认识时间", "长度单位换算"],
-    "三年级数学": ["万以内数的认识", "两位数乘法", "小数初步认识", "分数的初步认识"],
-    "四年级数学": ["大数的认识", "小数运算", "几何图形", "三角形和四边形"],
-    "五年级数学": ["分数运算", "方程初步", "立体图形", "多边形的面积"],
-    "六年级数学": ["比例应用", "圆的面积", "统计图表", "圆柱与圆锥"],
-    "一年级语文": ["拼音学习", "汉字书写", "简单阅读", "词语积累"],
-    "二年级语文": ["词语积累", "句子练习", "短文阅读", "标点符号使用"],
-    "三年级语文": ["段落写作", "阅读理解", "古诗词", "成语运用"],
-    "四年级语文": ["作文指导", "文言文入门", "修辞手法", "阅读理解技巧"],
-    "五年级语文": ["议论文基础", "文学欣赏", "写作技巧", "古文阅读"],
-    "六年级语文": ["综合写作", "古文阅读", "文学常识", "阅读理解"],
-    "一年级英语": ["字母学习", "简单单词", "基础对话", "英语儿歌"],
-    "二年级英语": ["单词记忆", "简单句型", "英语儿歌", "日常对话"],
-    "三年级英语": ["语法入门", "阅读理解", "英语写作", "英语对话"],
-    "四年级英语": ["时态学习", "阅读提升", "口语练习", "英语写作"],
-    "五年级英语": ["复合句学习", "阅读策略", "写作训练", "英语语法"],
-    "六年级英语": ["语法综合", "阅读进阶", "应试准备", "英语写作"],
+    "一年级数学": ["10以内加减法", "认识数字1-100", "简单图形识别", "数字大小比较", "认识钟表时间"],
+    "二年级数学": ["乘法口诀记忆", "100以内加减法", "认识时间", "长度单位换算", "人民币的认识"],
+    "三年级数学": ["万以内数的认识", "两位数乘法", "小数初步认识", "分数的初步认识", "长方形和正方形"],
+    "四年级数学": ["大数的认识", "小数运算", "几何图形", "三角形和四边形", "运算定律应用"],
+    "五年级数学": ["分数运算", "方程初步", "立体图形", "多边形的面积", "因数与倍数"],
+    "六年级数学": ["比例应用", "圆的面积", "统计图表", "圆柱与圆锥", "正比例反比例"],
+    "一年级语文": ["拼音学习", "汉字书写", "简单阅读", "词语积累", "句子练习"],
+    "二年级语文": ["词语积累", "句子练习", "短文阅读", "标点符号使用", "修辞手法入门"],
+    "三年级语文": ["段落写作", "阅读理解", "古诗词", "成语运用", "修辞手法应用"],
+    "四年级语文": ["作文指导", "文言文入门", "修辞手法", "阅读理解技巧", "古诗词鉴赏"],
+    "五年级语文": ["议论文基础", "文学欣赏", "写作技巧", "古文阅读", "现代文阅读"],
+    "六年级语文": ["综合写作", "古文阅读", "文学常识", "阅读理解", "作文表达"],
+    "一年级英语": ["字母学习", "简单单词", "基础对话", "英语儿歌", "日常用语"],
+    "二年级英语": ["单词记忆", "简单句型", "英语儿歌", "日常对话", "情景英语"],
+    "三年级英语": ["语法入门", "阅读理解", "英语写作", "英语对话", "英语短文"],
+    "四年级英语": ["时态学习", "阅读提升", "口语练习", "英语写作", "英语听力"],
+    "五年级英语": ["复合句学习", "阅读策略", "写作训练", "英语语法", "英语阅读"],
+    "六年级英语": ["语法综合", "阅读进阶", "应试准备", "英语写作", "英语口语"],
     
     # 初中部分
-    "初中数学": ["代数基础运算", "一元一次方程", "平面几何入门", "函数初步概念"],
-    "初中语文": ["文言文阅读技巧", "现代文阅读方法", "作文结构训练", "古诗词鉴赏"],
-    "初中英语": ["时态综合运用", "复合句语法", "阅读理解技巧", "英语写作训练"],
-    "初中物理": ["力学基础知识", "声学现象解析", "光学基本原理", "热学基础概念"],
-    "初中化学": ["化学元素认识", "化学反应基础", "化学实验安全", "化学方程式"],
+    "初中数学": ["代数基础运算", "一元一次方程", "平面几何入门", "函数初步概念", "三角形与全等"],
+    "初中语文": ["文言文阅读技巧", "现代文阅读方法", "作文结构训练", "古诗词鉴赏", "修辞手法应用"],
+    "初中英语": ["时态综合运用", "复合句语法", "阅读理解技巧", "英语写作训练", "听力提升方法"],
+    "初中物理": ["力学基础知识", "声学现象解析", "光学基本原理", "热学基础概念", "电学入门知识"],
+    "初中化学": ["化学元素认识", "化学反应基础", "化学实验安全", "化学方程式", "物质分类方法"],
     
     # 高中部分
-    "高中数学": ["函数与导数", "三角函数应用", "立体几何", "解析几何"],
-    "高中语文": ["古诗文深度解读", "现代文阅读进阶", "议论文写作技巧", "文学类文本阅读"],
-    "高中英语": ["长难句分析", "完形填空技巧", "阅读理解进阶", "写作能力提升"],
-    "高中物理": ["牛顿力学深入", "电磁学原理", "热力学定律", "光学深入"],
-    "高中化学": ["有机化学基础", "化学反应原理", "物质结构与性质", "化学平衡"],
+    "高中数学": ["函数与导数", "三角函数应用", "立体几何", "解析几何", "数列与数学归纳法"],
+    "高中语文": ["古诗文深度解读", "现代文阅读进阶", "议论文写作技巧", "文学类文本阅读", "语言运用技巧"],
+    "高中英语": ["长难句分析", "完形填空技巧", "阅读理解进阶", "写作能力提升", "听力理解训练"],
+    "高中物理": ["牛顿力学深入", "电磁学原理", "热力学定律", "光学深入", "近代物理基础"],
+    "高中化学": ["有机化学基础", "化学反应原理", "物质结构与性质", "化学平衡", "电化学基础"],
     
     # 大学部分
-    "大学数学": ["高等数学基础", "线性代数", "概率论与数理统计", "微积分应用"],
-    "大学英语": ["学术英语写作", "英语听说进阶", "跨文化交际", "专业英语阅读"],
-    "大学专业课": ["专业基础理论", "专业核心知识", "专业实践应用", "专业前沿发展"]
+    "大学数学": ["高等数学基础", "线性代数", "概率论与数理统计", "微积分应用", "数学分析入门"],
+    "大学英语": ["学术英语写作", "英语听说进阶", "跨文化交际", "专业英语阅读", "英语演讲技巧"],
+    "大学专业课": ["专业基础理论", "专业核心知识", "专业实践应用", "专业前沿发展", "专业研究方法"]
 }
 
 # 文章角度库
 ARTICLE_ANGLES = {
-    "数学": ["实用解题技巧", "常见错误分析", "思维训练方法", "生活应用实例"],
-    "语文": ["阅读方法指导", "写作技巧分享", "文学欣赏方法", "语言表达训练"],
-    "英语": ["口语练习方法", "单词记忆技巧", "语法学习策略", "听力训练方法"],
-    "物理": ["实验操作方法", "物理原理应用", "问题解决方法", "思维训练方法"],
-    "化学": ["实验安全操作", "化学反应原理", "化学计算技巧", "化学思维方法"],
-    "专业课": ["专业基础理论", "专业实践应用", "专业学习方法", "专业前沿动态"]
+    "数学": ["实用解题技巧", "常见错误分析", "思维训练方法", "生活应用实例", "趣味数学游戏", "考试重点解析"],
+    "语文": ["阅读方法指导", "写作技巧分享", "文学欣赏方法", "语言表达训练", "传统文化学习", "阅读理解策略"],
+    "英语": ["口语练习方法", "单词记忆技巧", "语法学习策略", "听力训练方法", "阅读能力提升", "写作技巧指导"],
+    "物理": ["实验操作方法", "物理原理应用", "问题解决方法", "思维训练方法", "物理模型建立", "物理公式推导"],
+    "化学": ["实验安全操作", "化学反应原理", "化学计算技巧", "化学思维方法", "物质性质分析", "化学实验设计"],
+    "专业课": ["专业基础理论", "专业实践应用", "专业学习方法", "专业前沿动态", "专业技能训练", "专业思维培养"]
+}
+
+# 扩展的免费图片库
+STOCK_IMAGE_LIBRARY = {
+    "数学": [
+        "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
+        "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?w=800",
+        "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=800",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
+        "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800",
+        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800"
+    ],
+    "语文": [
+        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800",
+        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800",
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800",
+        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
+        "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800",
+        "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?w=800",
+        "https://images.unsplash.com/photo-1506880135364-e28660dc35fa?w=800",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800"
+    ],
+    "英语": [
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800",
+        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800"
+    ],
+    "物理": [
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
+        "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800"
+    ],
+    "化学": [
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
+        "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800"
+    ],
+    "专业课": [
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800"
+    ],
+    "通用教育": [
+        "https://images.unsplash.com/photo-1497636577773-f1231844b336?w=800",
+        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
+        "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800",
+        "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
+        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800"
+    ]
 }
 
 # 标签缓存
 TAG_CACHE = {}
-
 # 图片缓存
 USED_IMAGES_CACHE = {'session': set()}
 
@@ -93,7 +166,6 @@ def generate_random_slug(length=8):
 
 def select_topic_and_angle():
     """智能选择主题和角度"""
-    # 将所有分类按学段分组
     all_categories = list(TOPICS_BY_CATEGORY.keys())
     
     # 计算各学段分类
@@ -146,13 +218,23 @@ def select_topic_and_angle():
 
 def generate_extended_title(base_topic, category, angle):
     """生成扩展的标题（10-20字）"""
-    # 定义标题模板
+    # 扩展的标题模板库
     templates = [
         "【{grade}{subject}】{base_topic}：{angle}的详细讲解与实用指南",
         "{grade}{subject}必备：{base_topic}的{angle}与学习方法全解析",
         "深度解析{base_topic}：{grade}{subject}的{angle}与应用技巧",
         "{grade}{subject}学习指南：{base_topic}的{angle}与实用技巧",
-        "全面掌握{base_topic}：{grade}{subject}的{angle}与解题方法"
+        "全面掌握{base_topic}：{grade}{subject}的{angle}与解题方法",
+        "{grade}{subject}重点知识：{base_topic}的{angle}详解与应用",
+        "{base_topic}完全指南：{grade}{subject}的{angle}与实践练习",
+        "高效学习{base_topic}：{grade}{subject}的{angle}与技巧分享",
+        "{grade}{subject}核心内容：{base_topic}的{angle}深度解析",
+        "{base_topic}全攻略：{grade}{subject}的{angle}与学习策略",
+        "从入门到精通：{base_topic}的{angle}详解与实战练习",
+        "系统学习{base_topic}：{grade}{subject}的{angle}与方法指导",
+        "突破难点：{base_topic}的{angle}解析与应试技巧",
+        "知识点全面梳理：{base_topic}的{angle}与考点解析",
+        "轻松掌握{base_topic}：{grade}{subject}的{angle}与学习方法"
     ]
     
     # 提取年级和科目
@@ -184,7 +266,7 @@ def generate_extended_title(base_topic, category, angle):
     # 确保标题长度在10-20字之间
     title_length = len(title)
     if title_length < 10:
-        prefixes = ["深度解析：", "详细讲解：", "完全掌握：", "高效学习："]
+        prefixes = ["深度解析：", "详细讲解：", "完全掌握：", "高效学习：", "全面了解：", "系统学习：", "轻松掌握：", "快速上手："]
         title = random.choice(prefixes) + title
     elif title_length > 20:
         title_words = list(title)
@@ -229,28 +311,29 @@ def get_zhipu_ai_content(topic, category, angle):
     # 扩展标题
     extended_title = generate_extended_title(topic, category, angle)
     
-    # 修复提示词
+    # 详细提示词
     prompt = f"""
 请以专业教师的身份，为{student_type}写一篇关于'{topic}'的详细学习文章，重点角度是：{angle}。
 
 **文章标题：{extended_title}**
 
 **写作要求：**
-1. 面向{student_type}
+1. 面向{student_type}，内容要专业、详细、实用
 2. 科目重点：{subject}，角度重点：{angle}
 3. 字数：至少2000字
 4. 内容结构必须包含：
-   - 引言：生动开头，说明学习重要性
-   - 核心知识：详细讲解3-5个核心知识点，每个有具体例子
-   - 学习方法：提供3-4种实用的学习方法
-   - 实践练习：设计5-6个练习题，包含详细解答
+   - 引言：生动开头，说明学习重要性和现实意义
+   - 核心知识：详细讲解3-5个核心知识点，每个要有具体例子和详细说明
+   - 学习方法：提供3-4种实用的学习方法，每种方法要有具体步骤
+   - 实践练习：设计5-6个练习题，包含详细解答过程和思路分析
    - 常见问题：列出5-6个常见问题及解决方法
    - 拓展学习：推荐学习资源和进阶知识
-   - 总结：回顾重点，给出学习建议
+   - 总结：回顾重点，给出学习建议和备考策略
 
 5. 使用干净的HTML格式，只使用：<h2>, <h3>, <p>, <ul>, <li>, <strong>, <em>
 6. 确保文章完整，不要中途停止
 7. 文章内容要与标题'{extended_title}'保持一致
+8. 使用生动具体的例子，避免空泛的理论
 
 请直接开始文章写作：
     """
@@ -260,7 +343,7 @@ def get_zhipu_ai_content(topic, category, angle):
         "messages": [
             {
                 "role": "system", 
-                "content": f"你是一个经验丰富的{grade}教师，擅长用适当的语言解释复杂概念，能够激发学生的学习兴趣。特别注意：1. 必须生成完整的长文章，至少2000字，包含所有要求的部分；2. 文章标题是'{extended_title}'，请围绕这个标题展开内容。"
+                "content": f"你是一个经验丰富的{grade}教师，擅长用适当的语言解释复杂概念，能够激发学生的学习兴趣。特别注意：1. 必须生成完整的长文章，至少2000字，包含所有要求的部分；2. 文章标题是'{extended_title}'，请围绕这个标题展开内容；3. 使用具体例子和实际应用场景。"
             },
             {
                 "role": "user", 
@@ -382,17 +465,26 @@ def generate_smart_tags(category, content, title):
     
     # 3. 学科特定标签
     if "数学" in subject:
-        math_tags = ["计算题", "应用题", "数学思维", "解题技巧", "几何图形", "代数基础"]
+        math_tags = ["计算题", "应用题", "数学思维", "解题技巧", "几何图形", "代数基础", "数据分析", "数学建模"]
         tags.update(random.sample(math_tags, 4))
     elif "语文" in subject:
-        chinese_tags = ["阅读理解", "作文指导", "古诗词", "汉字书写", "写作技巧", "文学常识"]
+        chinese_tags = ["阅读理解", "作文指导", "古诗词", "汉字书写", "写作技巧", "文学常识", "文言文", "修辞手法"]
         tags.update(random.sample(chinese_tags, 4))
     elif "英语" in subject:
-        english_tags = ["单词记忆", "语法学习", "口语练习", "听力训练", "英语阅读", "英语写作"]
+        english_tags = ["单词记忆", "语法学习", "口语练习", "听力训练", "英语阅读", "英语写作", "发音纠正", "情景对话"]
         tags.update(random.sample(english_tags, 4))
+    elif "物理" in subject:
+        physics_tags = ["力学", "电磁学", "光学", "实验", "物理公式", "物理模型", "科学探究", "物理思维"]
+        tags.update(random.sample(physics_tags, 4))
+    elif "化学" in subject:
+        chemistry_tags = ["化学反应", "化学实验", "化学方程式", "元素周期", "化学计算", "物质性质", "化学思维", "科学探究"]
+        tags.update(random.sample(chemistry_tags, 4))
+    elif "专业课" in subject:
+        major_tags = ["专业基础", "专业实践", "专业技能", "专业理论", "专业应用", "专业创新", "专业发展", "专业素养"]
+        tags.update(random.sample(major_tags, 4))
     
     # 4. 通用学习标签
-    learning_tags = ["学习方法", "学习资料", "教学资源", "知识点总结", "教育指导", "复习方法", "考试技巧"]
+    learning_tags = ["学习方法", "学习资料", "教学资源", "知识点总结", "教育指导", "学习计划", "复习方法", "考试技巧"]
     tags.update(random.sample(learning_tags, 3))
     
     # 5. 难度标签
@@ -524,6 +616,264 @@ def generate_complete_seo_data(title, content, tags, category):
         print(f"❌ 生成SEO数据失败: {e}")
         return None
 
+def get_stock_image(category, used_urls=None):
+    """获取免费库存图片"""
+    if used_urls is None:
+        used_urls = set()
+    
+    # 提取学科
+    if "初中" in category or "高中" in category or "大学" in category:
+        if "初中" in category:
+            subject = category[2:]
+        elif "高中" in category:
+            subject = category[2:]
+        else:  # 大学
+            subject = category[2:]
+    else:
+        subject = category[3:]
+    
+    # 根据学科选择图片库
+    if subject in STOCK_IMAGE_LIBRARY:
+        image_pool = STOCK_IMAGE_LIBRARY[subject]
+    else:
+        # 如果没有对应的学科，使用通用教育图片
+        image_pool = STOCK_IMAGE_LIBRARY.get("通用教育", [])
+    
+    # 过滤掉已使用的图片
+    available_images = [img for img in image_pool if img not in used_urls]
+    
+    if not available_images:
+        print(f"  ⚠️  所有学科图片都已使用过，使用通用图片")
+        available_images = STOCK_IMAGE_LIBRARY.get("通用教育", [])
+    
+    if not available_images:
+        # 如果没有可用图片，使用默认图片
+        default_images = [
+            "https://images.unsplash.com/photo-1497636577773-f1231844b336?w=800",
+            "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
+            "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800",
+            "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800"
+        ]
+        available_images = default_images
+    
+    # 随机选择一张图片
+    selected_image = random.choice(available_images)
+    
+    # 添加到已使用列表
+    if used_urls is not None:
+        used_urls.add(selected_image)
+    
+    print(f"✅ 从图库获取图片: {selected_image}")
+    return selected_image
+
+def upload_image_to_wordpress(image_url, title, alt_text=""):
+    """上传图片到WordPress并返回媒体ID和图片信息"""
+    try:
+        # 下载图片
+        response = requests.get(image_url, timeout=15)
+        if response.status_code != 200:
+            print(f"❌ 图片下载失败: {image_url}")
+            return None
+        
+        # 准备上传到WordPress
+        upload_url = WORDPRESS_URL.rstrip('/') + '/wp-json/wp/v2/media'
+        auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
+        
+        # 生成文件名
+        file_extension = image_url.split('.')[-1].lower()
+        if file_extension not in ['jpg', 'jpeg', 'png', 'gif']:
+            file_extension = 'jpg'
+        
+        filename = f"{generate_random_slug(10)}.{file_extension}"
+        
+        # 上传图片
+        headers = {
+            'Content-Disposition': f'attachment; filename={filename}',
+            'Content-Type': f'image/{file_extension}'
+        }
+        
+        upload_response = requests.post(
+            upload_url,
+            headers=headers,
+            data=response.content,
+            auth=auth,
+            timeout=30
+        )
+        
+        if upload_response.status_code == 201:
+            media_data = upload_response.json()
+            media_id = media_data['id']
+            
+            # 获取上传到WordPress后的图片URL
+            media_url = media_data.get('source_url')
+            if not media_url:
+                media_url = media_data.get('guid', {}).get('rendered', image_url)
+            
+            print(f"✅ 图片上传成功，媒体ID: {media_id}")
+            print(f"   WordPress图片URL: {media_url}")
+            
+            # 更新图片的alt文本和标题
+            update_data = {
+                'title': title,
+                'alt_text': alt_text or title
+            }
+            
+            update_response = requests.post(
+                f"{upload_url}/{media_id}",
+                json=update_data,
+                auth=auth,
+                timeout=10
+            )
+            
+            return {
+                'media_id': media_id,
+                'media_url': media_url,
+                'title': title,
+                'alt_text': alt_text or title
+            }
+        else:
+            print(f"❌ 图片上传失败: {upload_response.status_code}")
+            return None
+            
+    except Exception as e:
+        print(f"❌ 图片上传异常: {e}")
+        return None
+
+def add_featured_image(post_id, media_id):
+    """设置文章的特色图片"""
+    try:
+        update_url = WORDPRESS_URL.rstrip('/') + f'/wp-json/wp/v2/posts/{post_id}'
+        auth = HTTPBasicAuth(WORDPRESS_USER, WORDPRESS_PASSWORD)
+        
+        update_data = {
+            'featured_media': media_id
+        }
+        
+        response = requests.post(update_url, json=update_data, auth=auth, timeout=10)
+        
+        if response.status_code == 200:
+            print(f"✅ 特色图片设置成功")
+            return True
+        else:
+            print(f"⚠️  特色图片设置失败: {response.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ 设置特色图片异常: {e}")
+        return False
+
+def insert_images_into_content(content, images_data):
+    """在文章内容中插入多张图片"""
+    if not images_data:
+        return content
+    
+    # 图片HTML模板
+    image_template = '''
+<div class="article-image" style="margin: 20px 0; text-align: center;">
+    <img src="{image_url}" alt="{alt_text}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+    <p style="text-align: center; color: #666; font-size: 14px; margin-top: 8px; font-style: italic;">{caption}</p>
+</div>
+'''
+    
+    # 将内容分段
+    paragraphs = re.split(r'(</p>|</h2>|</h3>)', content)
+    
+    # 计算插入位置
+    insert_positions = []
+    if len(paragraphs) > 6:
+        insert_positions = [
+            max(2, len(paragraphs) // 4),
+            max(2, len(paragraphs) // 2),
+            max(2, len(paragraphs) * 3 // 4)
+        ]
+    elif len(paragraphs) > 3:
+        insert_positions = [
+            max(1, len(paragraphs) // 2)
+        ]
+    
+    content_with_images = ""
+    image_index = 0
+    
+    for i, para in enumerate(paragraphs):
+        content_with_images += para
+        
+        # 在指定位置插入图片
+        if i in insert_positions and image_index < len(images_data):
+            image_info = images_data[image_index]
+            image_html = image_template.format(
+                image_url=image_info['media_url'],
+                alt_text=image_info['alt_text'],
+                caption=image_info['caption']
+            )
+            content_with_images += image_html
+            image_index += 1
+            print(f"✅ 插入图片: {image_info['caption']}")
+    
+    return content_with_images
+
+def process_images_for_article(category, topic, content, post_id):
+    """为文章处理多张图片"""
+    try:
+        images_data = []
+        used_image_urls = set()  # 本次文章已使用的图片URL
+        
+        # 为文章生成2-3张图片
+        num_images = random.randint(2, 3)
+        
+        print(f"🖼️  为文章选择 {num_images} 张图片")
+        
+        for i in range(num_images):
+            # 获取多样化的图片
+            image_url = get_stock_image(category, used_image_urls)
+            
+            if image_url:
+                # 生成有意义的alt文本
+                if "初中" in category or "高中" in category or "大学" in category:
+                    if "初中" in category:
+                        grade = "初中"
+                    elif "高中" in category:
+                        grade = "高中"
+                    else:  # 大学
+                        grade = "大学"
+                else:
+                    grade = category[:3]
+                
+                alt_text = f"{grade}{topic} - 学习资料"
+                caption = f"{topic} - 学习资源"
+                
+                # 上传图片到WordPress
+                upload_result = upload_image_to_wordpress(image_url, f"{topic}_{i}", alt_text)
+                
+                if upload_result:
+                    images_data.append({
+                        'media_url': upload_result['media_url'],
+                        'alt_text': alt_text,
+                        'caption': caption,
+                        'media_id': upload_result['media_id']
+                    })
+                    print(f"✅ 成功处理图片 {i+1}")
+                    
+                    # 如果是第一张图片，设置为特色图片
+                    if i == 0 and upload_result and 'media_id' in upload_result:
+                        add_featured_image(post_id, upload_result['media_id'])
+                else:
+                    print(f"⚠️  图片上传失败: {image_url}")
+            
+            # 添加延迟避免请求过快
+            time.sleep(random.uniform(1, 2))
+        
+        # 在内容中插入所有图片
+        if images_data:
+            content_with_images = insert_images_into_content(content, images_data)
+            return content_with_images, images_data
+        else:
+            print("⚠️  无法获取图片，使用原内容")
+            return content, []
+            
+    except Exception as e:
+        print(f"❌ 图片处理异常: {e}")
+        return content, []
+
 def post_to_wordpress_with_complete_seo(title, content, category, slug):
     """发布到WordPress，包含完整的SEO信息"""
     try:
@@ -580,14 +930,38 @@ def post_to_wordpress_with_complete_seo(title, content, category, slug):
             post_id = post_data['id']
             print(f"✅ 文章保存为草稿成功！文章ID: {post_id}")
             
-            # 更新文章为发布状态
-            update_data = {'status': 'publish'}
-            update_response = requests.post(f"{api_url}/{post_id}", json=update_data, auth=auth, timeout=10)
+            # 处理图片
+            print("🖼️  开始处理文章图片...")
+            updated_content, images_data = process_images_for_article(category, title, content, post_id)
             
-            if update_response.status_code == 200:
-                print("✅ 文章已发布")
+            # 更新文章内容并发布
+            update_needed = False
+            update_data = {'status': 'publish'}
+            
+            if updated_content != content and images_data:
+                update_data['content'] = updated_content
+                update_needed = True
+            
+            if update_needed:
+                update_response = requests.post(
+                    f"{api_url}/{post_id}",
+                    json=update_data,
+                    auth=auth,
+                    timeout=10
+                )
+                if update_response.status_code == 200:
+                    print("✅ 文章已更新包含图片并发布")
+                else:
+                    print(f"⚠️  文章内容更新失败: {update_response.status_code}")
             else:
-                print(f"⚠️  文章状态更新失败: {update_response.status_code}")
+                update_response = requests.post(
+                    f"{api_url}/{post_id}",
+                    json=update_data,
+                    auth=auth,
+                    timeout=10
+                )
+                if update_response.status_code == 200:
+                    print("✅ 文章已发布")
             
             return True, post_id, tag_names
         else:
