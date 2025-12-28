@@ -216,8 +216,8 @@ def select_topic_and_angle():
     
     return category, base_topic, angle
 
-def generate_extended_title(base_topic, category, angle):
-    """生成扩展的标题（10-20字）- 修复版本"""
+def generate_diverse_title(base_topic, category, angle):
+    """生成多样化的随机标题（不再固定格式）"""
     # 提取年级和科目
     if "初中" in category or "高中" in category or "大学" in category:
         if "初中" in category:
@@ -233,25 +233,80 @@ def generate_extended_title(base_topic, category, angle):
         grade = "小学"
         subject = category[3:]
     
-    # 根据您截图的格式生成标题
-    title = f"知识点全面梳理：{base_topic}的{angle}"
+    # 多种标题模板，随机选择
+    title_templates = [
+        # 类型1：直接描述型
+        f"{base_topic}的{angle}详解",
+        f"{grade}{subject}：{base_topic}的{angle}解析",
+        f"掌握{base_topic}的{angle}方法",
+        
+        # 类型2：问题解决型
+        f"如何高效学习{base_topic}？{angle}全解析",
+        f"{base_topic}学习中的{angle}技巧",
+        f"解决{base_topic}学习难题的{angle}策略",
+        
+        # 类型3：应用实践型
+        f"{base_topic}在实际应用中的{angle}分析",
+        f"{angle}视角下的{base_topic}学习",
+        f"{base_topic}的{angle}实战演练",
+        
+        # 类型4：考试备考型
+        f"备战{grade}考试：{base_topic}的{angle}重点",
+        f"{base_topic}考点解析：{angle}应用",
+        f"考试必备：{base_topic}的{angle}技巧",
+        
+        # 类型5：深入探讨型
+        f"深入理解{base_topic}：{angle}深度解析",
+        f"{base_topic}的核心{angle}探究",
+        f"{angle}在{base_topic}学习中的关键作用",
+        
+        # 类型6：方法指导型
+        f"{grade}生必看：{base_topic}的{angle}指导",
+        f"从零开始掌握{base_topic}的{angle}",
+        f"{base_topic}学习方法：{angle}全攻略",
+        
+        # 类型7：趣味学习型
+        f"轻松学习{base_topic}：{angle}趣味解析",
+        f"发现{base_topic}的乐趣：{angle}探索",
+        f"有趣有料的{base_topic}：{angle}讲解",
+        
+        # 类型8：综合提升型
+        f"全面提升{base_topic}能力：{angle}综合训练",
+        f"{base_topic}学习进阶：{angle}深度训练",
+        f"{angle}驱动下的{base_topic}学习提升",
+        
+        # 类型9：案例分析型
+        f"{base_topic}经典案例：{angle}分析",
+        f"从案例看{base_topic}的{angle}应用",
+        f"{base_topic}实例解析：{angle}实战",
+        
+        # 类型10：对比学习型
+        f"{base_topic}与传统学习方法的{angle}对比",
+        f"{angle}对比分析：不同{base_topic}学习方法",
+        f"{base_topic}学习新视角：{angle}对比研究"
+    ]
     
-    # 确保标题长度合适
+    # 随机选择一个标题模板
+    title = random.choice(title_templates)
+    
+    # 确保标题长度合适（10-30字）
     title_length = len(title)
     if title_length < 10:
-        prefixes = ["知识点全面梳理：", "重点解析：", "详细讲解：", "深度解析："]
+        # 如果标题太短，添加一些修饰语
+        prefixes = ["深度解析：", "详细讲解：", "完全掌握：", "高效学习："]
         title = random.choice(prefixes) + title
     elif title_length > 30:
+        # 如果标题太长，适当缩短
         title_words = list(title)
         if len(title_words) > 30:
             for i in range(30, 0, -1):
-                if title_words[i] in ['，', '：', '、', '；']:
+                if title_words[i] in ['，', '：', '、', '；', '，', '。']:
                     title = ''.join(title_words[:i+1])
                     break
             else:
                 title = ''.join(title_words[:30]) + "..."
     
-    print(f"📝 生成扩展标题: {title} (长度: {len(title)}字)")
+    print(f"📝 生成多样化标题: {title} (长度: {len(title)}字)")
     return title
 
 def get_zhipu_ai_content(topic, category, angle):
@@ -281,14 +336,14 @@ def get_zhipu_ai_content(topic, category, angle):
         subject = category[3:]
         student_type = f"{grade}学生和家长"
     
-    # 扩展标题
-    extended_title = generate_extended_title(topic, category, angle)
+    # 多样化标题
+    diverse_title = generate_diverse_title(topic, category, angle)
     
     # 详细提示词
     prompt = f"""
 请以专业教师的身份，为{student_type}写一篇关于'{topic}'的详细学习文章，重点角度是：{angle}。
 
-**文章标题：{extended_title}**
+**文章标题：{diverse_title}**
 
 **写作要求：**
 1. 面向{student_type}，内容要专业、详细、实用
@@ -305,7 +360,7 @@ def get_zhipu_ai_content(topic, category, angle):
 
 5. 使用干净的HTML格式，只使用：<h2>, <h3>, <p>, <ul>, <li>, <strong>, <em>
 6. 确保文章完整，不要中途停止
-7. 文章内容要与标题'{extended_title}'保持一致
+7. 文章内容要与标题'{diverse_title}'保持一致
 8. 使用生动具体的例子，避免空泛的理论
 
 请直接开始文章写作：
@@ -316,7 +371,7 @@ def get_zhipu_ai_content(topic, category, angle):
         "messages": [
             {
                 "role": "system", 
-                "content": f"你是一个经验丰富的{grade}教师，擅长用适当的语言解释复杂概念，能够激发学生的学习兴趣。特别注意：1. 必须生成完整的长文章，至少2000字，包含所有要求的部分；2. 文章标题是'{extended_title}'，请围绕这个标题展开内容；3. 使用具体例子和实际应用场景。"
+                "content": f"你是一个经验丰富的{grade}教师，擅长用适当的语言解释复杂概念，能够激发学生的学习兴趣。特别注意：1. 必须生成完整的长文章，至少2000字，包含所有要求的部分；2. 文章标题是'{diverse_title}'，请围绕这个标题展开内容；3. 使用具体例子和实际应用场景。"
             },
             {
                 "role": "user", 
@@ -346,7 +401,7 @@ def get_zhipu_ai_content(topic, category, angle):
             if cleaned_content != content:
                 print(f"✅ 已清理HTML，从{len(content)}字符减少到{len(cleaned_content)}字符")
             
-            return extended_title, cleaned_content
+            return diverse_title, cleaned_content
         else:
             print(f"❌ API请求失败: {response.status_code}")
             print(f"错误详情: {response.text[:200]}")
@@ -359,11 +414,11 @@ def retry_ai_generation(topic, category, angle, max_retries=2):
     """重试AI生成，直到获得足够长度的内容"""
     for attempt in range(max_retries + 1):
         print(f"🔄 第{attempt+1}次尝试生成内容...")
-        extended_title, content = get_zhipu_ai_content(topic, category, angle)
+        diverse_title, content = get_zhipu_ai_content(topic, category, angle)
         
         if content and len(content) > 1500:
             print(f"✅ 第{attempt+1}次尝试成功，获得{len(content)}字符的内容")
-            return extended_title, content
+            return diverse_title, content
         elif content and len(content) > 0:
             print(f"⚠️  第{attempt+1}次尝试内容长度{len(content)}字符，尝试重试...")
             if attempt < max_retries:
@@ -373,7 +428,7 @@ def retry_ai_generation(topic, category, angle, max_retries=2):
             if attempt < max_retries:
                 time.sleep(2)
     
-    return extended_title, content
+    return diverse_title, content
 
 def clean_html_content(content):
     """清理HTML内容，移除无效标签"""
@@ -977,18 +1032,18 @@ def main():
     
     # 获取AI内容（带重试机制）
     print("\n🤖 正在调用AI生成内容...")
-    extended_title, content = retry_ai_generation(base_topic, category, angle, max_retries=2)
+    diverse_title, content = retry_ai_generation(base_topic, category, angle, max_retries=2)
     
-    if not content or not extended_title:
+    if not content or not diverse_title:
         print("❌ 内容生成失败")
         return False
     
-    print(f"✅ 内容生成成功，标题: {extended_title}")
+    print(f"✅ 内容生成成功，标题: {diverse_title}")
     print(f"✅ 文章长度: {len(content)}字符")
     
     # 发布文章
     print("\n🌐 正在发布到WordPress...")
-    success, post_id, tag_names = post_to_wordpress_with_complete_seo(extended_title, content, category, slug)
+    success, post_id, tag_names = post_to_wordpress_with_complete_seo(diverse_title, content, category, slug)
     
     if success:
         print("\n🎉 文章发布成功！")
