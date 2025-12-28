@@ -217,26 +217,7 @@ def select_topic_and_angle():
     return category, base_topic, angle
 
 def generate_extended_title(base_topic, category, angle):
-    """生成扩展的标题（10-20字）"""
-    # 扩展的标题模板库
-    templates = [
-        "【{grade}{subject}】{base_topic}：{angle}的详细讲解与实用指南",
-        "{grade}{subject}必备：{base_topic}的{angle}与学习方法全解析",
-        "深度解析{base_topic}：{grade}{subject}的{angle}与应用技巧",
-        "{grade}{subject}学习指南：{base_topic}的{angle}与实用技巧",
-        "全面掌握{base_topic}：{grade}{subject}的{angle}与解题方法",
-        "{grade}{subject}重点知识：{base_topic}的{angle}详解与应用",
-        "{base_topic}完全指南：{grade}{subject}的{angle}与实践练习",
-        "高效学习{base_topic}：{grade}{subject}的{angle}与技巧分享",
-        "{grade}{subject}核心内容：{base_topic}的{angle}深度解析",
-        "{base_topic}全攻略：{grade}{subject}的{angle}与学习策略",
-        "从入门到精通：{base_topic}的{angle}详解与实战练习",
-        "系统学习{base_topic}：{grade}{subject}的{angle}与方法指导",
-        "突破难点：{base_topic}的{angle}解析与应试技巧",
-        "知识点全面梳理：{base_topic}的{angle}与考点解析",
-        "轻松掌握{base_topic}：{grade}{subject}的{angle}与学习方法"
-    ]
-    
+    """生成扩展的标题（10-20字）- 修复版本"""
     # 提取年级和科目
     if "初中" in category or "高中" in category or "大学" in category:
         if "初中" in category:
@@ -252,31 +233,23 @@ def generate_extended_title(base_topic, category, angle):
         grade = "小学"
         subject = category[3:]
     
-    # 从模板中随机选择一个
-    template = random.choice(templates)
+    # 根据您截图的格式生成标题
+    title = f"知识点全面梳理：{base_topic}的{angle}"
     
-    # 生成标题
-    title = template.format(
-        grade=grade,
-        subject=subject,
-        base_topic=base_topic,
-        angle=angle
-    )
-    
-    # 确保标题长度在10-20字之间
+    # 确保标题长度合适
     title_length = len(title)
     if title_length < 10:
-        prefixes = ["深度解析：", "详细讲解：", "完全掌握：", "高效学习：", "全面了解：", "系统学习：", "轻松掌握：", "快速上手："]
+        prefixes = ["知识点全面梳理：", "重点解析：", "详细讲解：", "深度解析："]
         title = random.choice(prefixes) + title
-    elif title_length > 20:
+    elif title_length > 30:
         title_words = list(title)
-        if len(title_words) > 20:
-            for i in range(20, 0, -1):
+        if len(title_words) > 30:
+            for i in range(30, 0, -1):
                 if title_words[i] in ['，', '：', '、', '；']:
                     title = ''.join(title_words[:i+1])
                     break
             else:
-                title = ''.join(title_words[:20]) + "..."
+                title = ''.join(title_words[:30]) + "..."
     
     print(f"📝 生成扩展标题: {title} (长度: {len(title)}字)")
     return title
