@@ -1,9 +1,11 @@
 name: 每小时自动发布文章
 
 on:
-  schedule:
-    - cron: '0 * * * *'  # 每小时的第0分钟执行
-  workflow_dispatch:  # 允许手动运行
+   schedule:
+    # 每天北京时间上午 8:00 发布 (UTC 时间 00:00)
+    # 格式：分钟 小时 天 月 星期
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 保留手动触发按钮，方便调试
 
 jobs:
   publish:
