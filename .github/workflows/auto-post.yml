@@ -2,10 +2,10 @@ name: Auto Post to WordPress
 
 on:
   schedule:
-    # 每小时运行一次
-    - cron: '0 * * * *'
-  # 也可以手动触发
-  workflow_dispatch:
+    # 每天北京时间上午 8:00 发布 (UTC 时间 00:00)
+    # 格式：分钟 小时 天 月 星期
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 保留手动触发按钮，方便调试
 
 jobs:
   auto-post:
