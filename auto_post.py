@@ -425,7 +425,7 @@ def get_pexels_image(query):
     """从 Pexels 获取图片"""
     if not PEXELS_API_KEY: return None
         
-    url = "[https://api.pexels.com/v1/search](https://api.pexels.com/v1/search)"
+    url = "https://api.pexels.com/v1/search"
     headers = {"Authorization": PEXELS_API_KEY}
     params = {"query": query, "per_page": 15, "locale": "zh-CN"} # per_page 设大一点避免重复
     
