@@ -226,7 +226,7 @@ def get_nvidia_ai_content(topic, category, angle):
         print("❌ NVIDIA API密钥未设置")
         return None, None
         
-    url = "[https://integrate.api.nvidia.com/v1/chat/completions](https://integrate.api.nvidia.com/v1/chat/completions)"
+    url = "https://integrate.api.nvidia.com/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {NVIDIA_API_KEY}",
         "Content-Type": "application/json"
