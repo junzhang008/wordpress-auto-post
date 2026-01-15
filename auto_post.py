@@ -9,14 +9,21 @@ import jieba.analyse
 import time
 import re
 
-# 配置
-ZHIPU_API_KEY = os.getenv('ZHIPU_API_KEY')
+# ================= 配置区域 =================
+
+# 🔑 1. 英伟达 API Key (用于生成文章)
+NVIDIA_API_KEY = os.getenv('NVIDIA_API_KEY') 
+
+# 🔑 2. Pexels API Key (用于搜索图片)
+# 请在 [https://www.pexels.com/api/](https://www.pexels.com/api/) 申请
+PEXELS_API_KEY = os.getenv('PEXELS_API_KEY')
+
+# 🔑 3. WordPress 配置
 WORDPRESS_URL = os.getenv('WORDPRESS_URL')
 WORDPRESS_USER = os.getenv('WORDPRESS_USER')
 WORDPRESS_PASSWORD = os.getenv('WORDPRESS_PASSWORD')
-UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY')
 
-# 分类映射
+# 分类映射 (根据你的WordPress实际ID修改)
 CATEGORY_MAP = {
     "一年级数学": 6, "二年级数学": 7, "三年级数学": 8, "四年级数学": 9, 
     "五年级数学": 10, "六年级数学": 11, "一年级语文": 12, "二年级语文": 13, 
@@ -78,80 +85,6 @@ ARTICLE_ANGLES = {
     "物理": ["实验操作方法", "物理原理应用", "问题解决方法", "思维训练方法", "物理模型建立", "物理公式推导"],
     "化学": ["实验安全操作", "化学反应原理", "化学计算技巧", "化学思维方法", "物质性质分析", "化学实验设计"],
     "专业课": ["专业基础理论", "专业实践应用", "专业学习方法", "专业前沿动态", "专业技能训练", "专业思维培养"]
-}
-
-# 扩展的免费图片库
-STOCK_IMAGE_LIBRARY = {
-    "数学": [
-        "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-        "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?w=800",
-        "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
-        "https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=800",
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
-        "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=800",
-        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800"
-    ],
-    "语文": [
-        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800",
-        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800",
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800",
-        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
-        "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800",
-        "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?w=800",
-        "https://images.unsplash.com/photo-1506880135364-e28660dc35fa?w=800",
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800"
-    ],
-    "英语": [
-        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
-        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
-        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
-        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800",
-        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
-        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800"
-    ],
-    "物理": [
-        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
-        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
-        "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
-        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
-        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800"
-    ],
-    "化学": [
-        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
-        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
-        "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
-        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800",
-        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
-        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800"
-    ],
-    "专业课": [
-        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
-        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800",
-        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
-        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800",
-        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800"
-    ],
-    "通用教育": [
-        "https://images.unsplash.com/photo-1497636577773-f1231844b336?w=800",
-        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
-        "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800",
-        "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
-        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800",
-        "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800",
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800"
-    ]
 }
 
 # 标签缓存
@@ -217,7 +150,7 @@ def select_topic_and_angle():
     return category, base_topic, angle
 
 def generate_diverse_title(base_topic, category, angle):
-    """生成多样化的随机标题（不再固定格式）"""
+    """生成多样化的随机标题"""
     # 提取年级和科目
     if "初中" in category or "高中" in category or "大学" in category:
         if "初中" in category:
@@ -235,68 +168,46 @@ def generate_diverse_title(base_topic, category, angle):
     
     # 多种标题模板，随机选择
     title_templates = [
-        # 类型1：直接描述型
         f"{base_topic}的{angle}详解",
         f"{grade}{subject}：{base_topic}的{angle}解析",
         f"掌握{base_topic}的{angle}方法",
-        
-        # 类型2：问题解决型
         f"如何高效学习{base_topic}？{angle}全解析",
         f"{base_topic}学习中的{angle}技巧",
         f"解决{base_topic}学习难题的{angle}策略",
-        
-        # 类型3：应用实践型
         f"{base_topic}在实际应用中的{angle}分析",
         f"{angle}视角下的{base_topic}学习",
         f"{base_topic}的{angle}实战演练",
-        
-        # 类型4：考试备考型
         f"备战{grade}考试：{base_topic}的{angle}重点",
         f"{base_topic}考点解析：{angle}应用",
         f"考试必备：{base_topic}的{angle}技巧",
-        
-        # 类型5：深入探讨型
         f"深入理解{base_topic}：{angle}深度解析",
         f"{base_topic}的核心{angle}探究",
         f"{angle}在{base_topic}学习中的关键作用",
-        
-        # 类型6：方法指导型
         f"{grade}生必看：{base_topic}的{angle}指导",
         f"从零开始掌握{base_topic}的{angle}",
         f"{base_topic}学习方法：{angle}全攻略",
-        
-        # 类型7：趣味学习型
         f"轻松学习{base_topic}：{angle}趣味解析",
         f"发现{base_topic}的乐趣：{angle}探索",
         f"有趣有料的{base_topic}：{angle}讲解",
-        
-        # 类型8：综合提升型
         f"全面提升{base_topic}能力：{angle}综合训练",
         f"{base_topic}学习进阶：{angle}深度训练",
         f"{angle}驱动下的{base_topic}学习提升",
-        
-        # 类型9：案例分析型
         f"{base_topic}经典案例：{angle}分析",
         f"从案例看{base_topic}的{angle}应用",
         f"{base_topic}实例解析：{angle}实战",
-        
-        # 类型10：对比学习型
         f"{base_topic}与传统学习方法的{angle}对比",
         f"{angle}对比分析：不同{base_topic}学习方法",
         f"{base_topic}学习新视角：{angle}对比研究"
     ]
     
-    # 随机选择一个标题模板
     title = random.choice(title_templates)
     
     # 确保标题长度合适（10-30字）
     title_length = len(title)
     if title_length < 10:
-        # 如果标题太短，添加一些修饰语
         prefixes = ["深度解析：", "详细讲解：", "完全掌握：", "高效学习："]
         title = random.choice(prefixes) + title
     elif title_length > 30:
-        # 如果标题太长，适当缩短
         title_words = list(title)
         if len(title_words) > 30:
             for i in range(30, 0, -1):
@@ -309,14 +220,17 @@ def generate_diverse_title(base_topic, category, angle):
     print(f"📝 生成多样化标题: {title} (长度: {len(title)}字)")
     return title
 
-def get_zhipu_ai_content(topic, category, angle):
-    """使用智谱AI生成丰富内容的文章"""
-    if not ZHIPU_API_KEY:
-        print("❌ 智谱API密钥未设置")
+def get_nvidia_ai_content(topic, category, angle):
+    """使用 NVIDIA API 生成内容"""
+    if not NVIDIA_API_KEY:
+        print("❌ NVIDIA API密钥未设置")
         return None, None
         
-    url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
-    headers = {"Authorization": f"Bearer {ZHIPU_API_KEY}", "Content-Type": "application/json"}
+    url = "[https://integrate.api.nvidia.com/v1/chat/completions](https://integrate.api.nvidia.com/v1/chat/completions)"
+    headers = {
+        "Authorization": f"Bearer {NVIDIA_API_KEY}",
+        "Content-Type": "application/json"
+    }
     
     # 根据分类定制提示词
     if "初中" in category or "高中" in category or "大学" in category:
@@ -362,16 +276,17 @@ def get_zhipu_ai_content(topic, category, angle):
 6. 确保文章完整，不要中途停止
 7. 文章内容要与标题'{diverse_title}'保持一致
 8. 使用生动具体的例子，避免空泛的理论
+9. **绝对不要输出Markdown代码块标记（不要使用 ```html 或 ```），直接返回纯HTML代码**
 
 请直接开始文章写作：
     """
     
     data = {
-        "model": "glm-4",
+        "model": "meta/llama-3.1-405b-instruct",
         "messages": [
             {
                 "role": "system", 
-                "content": f"你是一个经验丰富的{grade}教师，擅长用适当的语言解释复杂概念，能够激发学生的学习兴趣。特别注意：1. 必须生成完整的长文章，至少2000字，包含所有要求的部分；2. 文章标题是'{diverse_title}'，请围绕这个标题展开内容；3. 使用具体例子和实际应用场景。"
+                "content": f"你是一个经验丰富的{grade}教师。写作时直接输出HTML，不要包含 ```html 等Markdown标记。"
             },
             {
                 "role": "user", 
@@ -379,29 +294,30 @@ def get_zhipu_ai_content(topic, category, angle):
             }
         ],
         "temperature": 0.7,
+        "top_p": 0.9,
         "max_tokens": 4000,
     }
     
     try:
-        print(f"🤖 正在调用AI生成内容...")
+        print(f"🤖 正在调用 NVIDIA AI 生成内容...")
         response = requests.post(url, headers=headers, json=data, timeout=120)
         
         if response.status_code == 200:
             result = response.json()
             content = result['choices'][0]['message']['content'].strip()
+            
+            # 清理可能存在的 Markdown 代码块标记（即使提示了，模型有时还会加）
+            content = re.sub(r'^```html\s*', '', content, flags=re.IGNORECASE)
+            content = re.sub(r'^```\s*', '', content)
+            content = re.sub(r'\s*```$', '', content)
+            
             content_length = len(content)
             print(f"✅ AI生成内容长度: {content_length}字符")
             
             if content_length < 1000:
                 print(f"⚠️  警告：生成的内容可能不完整，只有{content_length}字符")
             
-            # 清理HTML
-            cleaned_content = clean_html_content(content)
-            
-            if cleaned_content != content:
-                print(f"✅ 已清理HTML，从{len(content)}字符减少到{len(cleaned_content)}字符")
-            
-            return diverse_title, cleaned_content
+            return diverse_title, content
         else:
             print(f"❌ API请求失败: {response.status_code}")
             print(f"错误详情: {response.text[:200]}")
@@ -414,7 +330,7 @@ def retry_ai_generation(topic, category, angle, max_retries=2):
     """重试AI生成，直到获得足够长度的内容"""
     for attempt in range(max_retries + 1):
         print(f"🔄 第{attempt+1}次尝试生成内容...")
-        diverse_title, content = get_zhipu_ai_content(topic, category, angle)
+        diverse_title, content = get_nvidia_ai_content(topic, category, angle)
         
         if content and len(content) > 1500:
             print(f"✅ 第{attempt+1}次尝试成功，获得{len(content)}字符的内容")
@@ -429,34 +345,6 @@ def retry_ai_generation(topic, category, angle, max_retries=2):
                 time.sleep(2)
     
     return diverse_title, content
-
-def clean_html_content(content):
-    """清理HTML内容，移除无效标签"""
-    if not content:
-        return content
-    
-    cleaned_content = content
-    
-    # 只清理特定的无效标签
-    invalid_patterns = [
-        r'<pFig[^>]*>',
-        r'</pFig>',
-        r'<quad[^>]*>',
-        r'</quad>',
-        r'<pos_\d+[^>]*>',
-    ]
-    
-    for pattern in invalid_patterns:
-        cleaned_content = re.sub(pattern, '', cleaned_content)
-    
-    # 清理多余的空行
-    cleaned_content = re.sub(r'\n{3,}', '\n\n', cleaned_content)
-    
-    if cleaned_content.strip() == '':
-        print("⚠️  清理后内容为空，返回原始内容")
-        return content
-    
-    return cleaned_content
 
 def generate_smart_tags(category, content, title):
     """生成智能标签名称"""
@@ -644,55 +532,32 @@ def generate_complete_seo_data(title, content, tags, category):
         print(f"❌ 生成SEO数据失败: {e}")
         return None
 
-def get_stock_image(category, used_urls=None):
-    """获取免费库存图片"""
-    if used_urls is None:
-        used_urls = set()
+def get_pexels_image(query):
+    """从 Pexels 获取图片"""
+    if not PEXELS_API_KEY:
+        print("❌ Pexels API Key 未设置")
+        return None
+        
+    url = "[https://api.pexels.com/v1/search](https://api.pexels.com/v1/search)"
+    headers = {"Authorization": PEXELS_API_KEY}
+    params = {
+        "query": query,
+        "per_page": 10,
+        "locale": "zh-CN"
+    }
     
-    # 提取学科
-    if "初中" in category or "高中" in category or "大学" in category:
-        if "初中" in category:
-            subject = category[2:]
-        elif "高中" in category:
-            subject = category[2:]
-        else:  # 大学
-            subject = category[2:]
-    else:
-        subject = category[3:]
+    try:
+        response = requests.get(url, headers=headers, params=params, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if data['photos']:
+                # 随机选一张
+                photo = random.choice(data['photos'])
+                return photo['src']['large']
+    except Exception as e:
+        print(f"⚠️ Pexels 搜索失败: {e}")
     
-    # 根据学科选择图片库
-    if subject in STOCK_IMAGE_LIBRARY:
-        image_pool = STOCK_IMAGE_LIBRARY[subject]
-    else:
-        # 如果没有对应的学科，使用通用教育图片
-        image_pool = STOCK_IMAGE_LIBRARY.get("通用教育", [])
-    
-    # 过滤掉已使用的图片
-    available_images = [img for img in image_pool if img not in used_urls]
-    
-    if not available_images:
-        print(f"  ⚠️  所有学科图片都已使用过，使用通用图片")
-        available_images = STOCK_IMAGE_LIBRARY.get("通用教育", [])
-    
-    if not available_images:
-        # 如果没有可用图片，使用默认图片
-        default_images = [
-            "https://images.unsplash.com/photo-1497636577773-f1231844b336?w=800",
-            "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
-            "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800",
-            "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800"
-        ]
-        available_images = default_images
-    
-    # 随机选择一张图片
-    selected_image = random.choice(available_images)
-    
-    # 添加到已使用列表
-    if used_urls is not None:
-        used_urls.add(selected_image)
-    
-    print(f"✅ 从图库获取图片: {selected_image}")
-    return selected_image
+    return None
 
 def upload_image_to_wordpress(image_url, title, alt_text=""):
     """上传图片到WordPress并返回媒体ID和图片信息"""
@@ -840,7 +705,7 @@ def insert_images_into_content(content, images_data):
     return content_with_images
 
 def process_images_for_article(category, topic, content, post_id):
-    """为文章处理多张图片"""
+    """为文章处理多张图片 (使用 Pexels API)"""
     try:
         images_data = []
         used_image_urls = set()  # 本次文章已使用的图片URL
@@ -850,11 +715,30 @@ def process_images_for_article(category, topic, content, post_id):
         
         print(f"🖼️  为文章选择 {num_images} 张图片")
         
-        for i in range(num_images):
-            # 获取多样化的图片
-            image_url = get_stock_image(category, used_image_urls)
+        # 确定搜索关键词
+        if "初中" in category or "高中" in category or "大学" in category:
+            if "初中" in category:
+                subject = category[2:]
+            elif "高中" in category:
+                subject = category[2:]
+            else:  # 大学
+                subject = category[2:]
+        else:
+            subject = category[3:]
             
-            if image_url:
+        search_query = f"{subject} education"  # 构造查询词，例如 "数学 education"
+        
+        for i in range(num_images):
+            # 获取图片 (使用 Pexels)
+            image_url = get_pexels_image(search_query)
+            
+            # 如果 Pexels 失败或重复，尝试用 Topic 搜
+            if not image_url or image_url in used_image_urls:
+                 image_url = get_pexels_image(topic)
+            
+            if image_url and image_url not in used_image_urls:
+                used_image_urls.add(image_url)
+                
                 # 生成有意义的alt文本
                 if "初中" in category or "高中" in category or "大学" in category:
                     if "初中" in category:
@@ -1009,7 +893,7 @@ def main():
     USED_IMAGES_CACHE['session'].clear()
     
     # 检查环境变量
-    if not all([ZHIPU_API_KEY, WORDPRESS_URL, WORDPRESS_USER, WORDPRESS_PASSWORD]):
+    if not all([NVIDIA_API_KEY, WORDPRESS_URL, WORDPRESS_USER, WORDPRESS_PASSWORD]):
         print("❌ 错误：缺少必要的环境变量配置")
         return False
     
