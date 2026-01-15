@@ -265,7 +265,7 @@ def get_nvidia_ai_content(topic, category, angle):
     """
     
     data = {
-        "model": "meta/llama-3.1-405b-instruct",
+        "model": "meta/llama-3.1-70b-instruct",
         "messages": [
             {
                 "role": "system", 
