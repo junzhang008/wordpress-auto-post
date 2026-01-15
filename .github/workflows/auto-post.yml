@@ -27,10 +27,10 @@ jobs:
         
     - name: Run auto post script
       env:
-        ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+        NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
         WORDPRESS_URL: ${{ secrets.WORDPRESS_URL }}
         WORDPRESS_USER: ${{ secrets.WORDPRESS_USER }}
         WORDPRESS_PASSWORD: ${{ secrets.WORDPRESS_PASSWORD }}
-        UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+        PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
       run: |
         python auto_post.py
